@@ -41,11 +41,13 @@ export class EventBus {
     for (const e of this.#events) fn(e)
   }
 
-  /** Reset (for tests). */
+  /**
+   * Reset the transcript (for tests and UI re-launches). Keeps listeners so
+   * live control-room sockets survive a fresh run.
+   */
   reset(): void {
     this.#events = []
     this.#seq = 0
-    this.#listeners.clear()
   }
 }
 

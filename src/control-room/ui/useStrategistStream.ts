@@ -38,6 +38,8 @@ export interface StrategistState {
   connected: boolean
   eventCount: number
   runStatus: RunStatus
+  /** True when this control room accepts event configs from the UI (interactive mode). */
+  acceptsRuns: boolean
   stages: Stage[]
   feed: FeedItem[]
   rounds: RoundState[]
@@ -67,12 +69,24 @@ function toFeedItem(evt: StreamEvent): FeedItem | null {
 export function useStrategistStream(wsUrl?: string): StrategistState & {
   interject: (persona: PanelPersonaId | 'all', message: string) => void
   resolveGate: (gate: string, decision: 'approved' | 'rejected') => void
+  launchRun: (config: unknown) => Promise<{ ok: boolean; errors?: { field: string; message: string }[] }>
 } {
   const [events, setEvents] = useState<StreamEvent[]>([])
   const [connected, setConnected] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [acceptsRuns, setAcceptsRuns] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
   const urlRef = useRef(wsUrl ?? '')
+
+  // Does this control room accept configs from the browser (interactive mode)?
+  // In immediate mode (server started with --config) it never shows the launch
+  // form, even before the first run event arrives.
+  useEffect(() => {
+    fetch('/api/status')
+      .then((r) => r.json())
+      .then((d) => { if (d && typeof d.acceptsRuns === 'boolean') setAcceptsRuns(d.acceptsRuns) })
+      .catch(() => { /* server may be mid-restart — stay conservative (no form) */ })
+  }, [])
 
   useEffect(() => {
     const url = urlRef.current
@@ -90,7 +104,14 @@ export function useStrategistStream(wsUrl?: string): StrategistState & {
         try {
           const msg = JSON.parse(String(raw.data))
           if (msg && typeof msg === 'object' && 'seq' in msg && 'event' in msg) {
-            setEvents((prev) => (prev.some((e) => e.seq === (msg as StreamEvent).seq) ? prev : [...prev, msg as StreamEvent]))
+            const evt = msg as StreamEvent
+            setEvents((prev) => {
+              // A fresh run/starting after prior events → start a new transcript
+              // (UI re-launch). On a fresh connect prev is empty, so the replay
+              // of an already-started run is unaffected.
+              if (evt.event.kind === 'run' && evt.event.status === 'starting' && prev.length > 0) return [evt]
+              return prev.some((e) => e.seq === evt.seq) ? prev : [...prev, evt]
+            })
           }
         } catch {
           // ignore non-JSON frames (hello/pong)
@@ -125,6 +146,25 @@ export function useStrategistStream(wsUrl?: string): StrategistState & {
   const resolveGate = useCallback((gate: string, decision: 'approved' | 'rejected') => {
     send({ type: 'gate', gate, decision })
   }, [send])
+
+  /** Submit an EventConfig to the server and start a run (interactive mode). */
+  const launchRun = useCallback(async (config: unknown): Promise<{
+    ok: boolean
+    errors?: { field: string; message: string }[]
+  }> => {
+    try {
+      const res = await fetch('/api/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok) return { ok: true }
+      return { ok: false, errors: (data as { errors?: { field: string; message: string }[] })?.errors }
+    } catch {
+      return { ok: false, errors: [{ field: 'network', message: 'Could not reach the strategist server.' }] }
+    }
+  }, [])
 
   const state = useMemo<StrategistState>(() => {
     const feed: FeedItem[] = []
@@ -198,6 +238,7 @@ export function useStrategistStream(wsUrl?: string): StrategistState & {
       connected,
       eventCount: events.length,
       runStatus,
+      acceptsRuns,
       stages,
       feed,
       rounds: sortedRounds,
@@ -206,9 +247,9 @@ export function useStrategistStream(wsUrl?: string): StrategistState & {
       latestScores: lastRound?.scores ?? [],
       error,
     }
-  }, [events, connected, error])
+  }, [events, connected, error, acceptsRuns])
 
-  return { ...state, interject, resolveGate }
+  return { ...state, interject, resolveGate, launchRun }
 }
 
 export { STAGE_ORDER }

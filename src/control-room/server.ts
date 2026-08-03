@@ -15,6 +15,9 @@ import { readFile } from 'node:fs/promises'
 import { join, normalize, extname } from 'node:path'
 import { WebSocketServer, WebSocket } from 'ws'
 import { globalBus, type EventBus } from '../engine/event-bus.js'
+import { validateConfig } from '../config/schema.js'
+import type { EventConfig } from '../config/types.js'
+import type { RunResult } from '../engine/orchestrator.js'
 import { DirectiveBroker } from './broker.js'
 import type { PanelPersonaId } from '../data/types.js'
 
@@ -37,7 +40,14 @@ export interface ControlRoomOptions {
   bus?: EventBus
   /** How long a human gate stays open before auto-escalating (ms). 0 = forever. */
   gateTimeoutMs?: number
+  /**
+   * Interactive mode: when present, the server accepts POST /api/run and
+   * invokes this handler with the validated EventConfig to start a run.
+   */
+  onRun?: (config: EventConfig) => Promise<RunResult>
 }
+
+export type RunStatus = 'idle' | 'starting' | 'running' | 'complete' | 'error'
 
 interface PendingGate {
   resolve: (approved: boolean) => void
@@ -54,6 +64,8 @@ export class ControlRoomServer {
   #pendingGates = new Map<string, PendingGate>()
   #port: number
   #started = false
+  #onRun?: (config: EventConfig) => Promise<RunResult>
+  #runStatus: RunStatus = 'idle'
   /** Set by the orchestrator: when true, gates resolve instantly (headless). */
   autoResolveGates = false
 
@@ -63,6 +75,13 @@ export class ControlRoomServer {
     this.#distDir = opts.distDir ?? join(import.meta.dirname, '../../dist')
     this.#gateTimeoutMs = opts.gateTimeoutMs ?? 10 * 60_000
     this.#port = opts.port ?? Number(process.env.CONTROL_ROOM_PORT ?? 8787)
+    this.#onRun = opts.onRun
+
+    // Mirror the run status from the bus so /api/status always reflects the
+    // live run (and POST /api/run can guard against concurrent starts).
+    this.#bus.subscribe((evt) => {
+      if (evt.event.kind === 'run') this.#runStatus = evt.event.status
+    })
 
     this.#http = createServer((req, res) => this.#handleHttp(req, res))
     this.#wss = new WebSocketServer({ noServer: true })
@@ -105,11 +124,60 @@ export class ControlRoomServer {
     return this.#port
   }
 
+  /** Current run lifecycle status (mirrored from the event bus). */
+  get runStatus(): RunStatus {
+    return this.#runStatus
+  }
+
   // ── Run-level broadcast ──────────────────────────────────────────────────
 
   /** Emit a run-status event on the bus (also streams to all clients). */
   broadcastRun(status: 'starting' | 'running' | 'complete' | 'error', message?: string): void {
     this.#bus.emit({ kind: 'run', status, message })
+  }
+
+  // ── Interactive start (config fed from the UI) ───────────────────────────
+
+  /** POST /api/run — validate the submitted EventConfig and start a run. */
+  async #handleStartRun(req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse): Promise<void> {
+    if (!this.#onRun) {
+      this.#sendJson(res, 501, {
+        error: 'This control room does not accept runs from the UI. Start it without --config: pnpm strategist:run --ui',
+      })
+      return
+    }
+    if (this.#runStatus !== 'idle') {
+      this.#sendJson(res, 409, { error: `A run is already ${this.#runStatus}.` })
+      return
+    }
+
+    let raw: unknown
+    try {
+      const body = await readBody(req)
+      raw = JSON.parse(body)
+    } catch {
+      this.#sendJson(res, 400, { errors: [{ field: 'body', message: 'Request body must be valid JSON.' }] })
+      return
+    }
+
+    const errors = validateConfig(raw as Record<string, unknown>)
+    if (errors.length > 0) {
+      this.#sendJson(res, 400, { errors })
+      return
+    }
+
+    this.#runStatus = 'starting'
+    const config = raw as EventConfig
+    this.#onRun(config).catch((err: unknown) => {
+      console.error('❌  UI-triggered run failed:', err)
+      this.broadcastRun('error', err instanceof Error ? err.message : String(err))
+    })
+    this.#sendJson(res, 202, { ok: true, eventName: config.name })
+  }
+
+  #sendJson(res: import('node:http').ServerResponse, status: number, data: unknown): void {
+    res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' })
+    res.end(JSON.stringify(data))
   }
 
   // ── Gates ────────────────────────────────────────────────────────────────
@@ -157,6 +225,17 @@ export class ControlRoomServer {
   async #handleHttp(req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse): Promise<void> {
     const url = new URL(req.url ?? '/', 'http://localhost')
     const pathname = decodeURIComponent(url.pathname)
+
+    // ── API ────────────────────────────────────────────────────────────
+    if (pathname === '/api/status' && req.method === 'GET') {
+      this.#sendJson(res, 200, { status: this.#runStatus, acceptsRuns: this.#onRun !== undefined })
+      return
+    }
+    if (pathname === '/api/run' && req.method === 'POST') {
+      await this.#handleStartRun(req, res)
+      return
+    }
+
     const rel = pathname === '/' ? 'index.html' : pathname.replace(/^\/+/, '')
 
     // Guard against path traversal — only serve inside distDir.
@@ -239,4 +318,14 @@ type ClientMessage =
 export function createControlRoom(opts?: Partial<ControlRoomOptions>): ControlRoomServer {
   const broker = opts?.broker ?? new DirectiveBroker()
   return new ControlRoomServer({ broker, ...opts })
+}
+
+/** Buffer the request body as a string (small JSON payloads). */
+function readBody(req: import('node:http').IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    req.on('data', (c: Buffer) => chunks.push(c))
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')))
+    req.on('error', reject)
+  })
 }

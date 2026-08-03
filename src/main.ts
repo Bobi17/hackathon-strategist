@@ -11,6 +11,7 @@ import { detectProvider } from './agents/llm.js'
 import { Orchestrator } from './engine/orchestrator.js'
 import { ControlRoomServer } from './control-room/server.js'
 import { DirectiveBroker } from './control-room/broker.js'
+import { globalBus } from './engine/event-bus.js'
 
 async function main(): Promise<void> {
   // Single source of truth for LLM provider url/key/model — must load before
@@ -27,15 +28,17 @@ async function main(): Promise<void> {
     strict: true,
   })
 
-  if (values.help || !values.config) {
+  const interactive = values.ui && !values.config
+  if (values.help || (!values.config && !values.ui)) {
     console.log(`
 🎯  Hackathon Strategist
 
 Usage:
   pnpm strategist:run --config <path> [--ui | --headless]
+  pnpm strategist:run --ui              # feed the event config from the browser
 
 Options:
-  --config, -c   Path to the event config JSON (required)
+  --config, -c   Path to the event config JSON (optional when --ui is set)
   --ui           Run with control-room UI (launches WS server)
   --headless     Run without UI (default)
   --help, -h     Show this help
@@ -48,7 +51,29 @@ LLM provider — sourced only from .env.local (see .env.example):
     process.exit(values.help ? 0 : 1)
   }
 
-  const configPath = resolve(values.config)
+  // ── Interactive mode — no config file; the browser feeds the event info ──
+  if (interactive) {
+    const broker = new DirectiveBroker()
+    let server: ControlRoomServer
+    server = new ControlRoomServer({
+      broker,
+      port: Number(process.env.CONTROL_ROOM_PORT ?? 8787),
+      onRun: async (cfg) => {
+        globalBus.reset()
+        const orch = new Orchestrator({ ...cfg, mode: 'ui' }, { server, broker })
+        return orch.run()
+      },
+    })
+    await server.start()
+    console.log(`🖥️   Control room live at  http://localhost:${server.port}   (WS: /ws)`)
+    console.log(`   No --config given — feed the hackathon info in the browser.`)
+    console.log(`   Waiting for the event config …  (Ctrl-C to exit)`)
+    console.log()
+    await new Promise(() => { /* keep alive */ })
+    return
+  }
+
+  const configPath = resolve(values.config!)
   console.log(`🎯  Loading config from ${configPath}`)
 
   const config = await loadConfig(configPath)

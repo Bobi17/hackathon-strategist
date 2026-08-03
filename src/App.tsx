@@ -14,6 +14,7 @@ import {
   Transcript,
   VerdictPanel,
 } from './control-room/ui/components'
+import { LaunchForm } from './control-room/ui/LaunchForm'
 
 export default function App() {
   const stream = useStrategistStream()
@@ -24,6 +25,9 @@ export default function App() {
     () => stream.rounds.find((r) => r.number === selectedRound) ?? latestRound,
     [stream.rounds, selectedRound, latestRound],
   )
+
+  // Interactive mode: no run yet and the server accepts configs → launch form.
+  const showLaunch = stream.runStatus === 'idle' && stream.acceptsRuns
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -42,6 +46,9 @@ export default function App() {
       </header>
 
       {/* Body */}
+      {showLaunch ? (
+        <LaunchForm onLaunch={stream.launchRun} />
+      ) : (
       <main className="grid grid-cols-1 lg:grid-cols-5 gap-4 px-5 py-4">
         {/* Transcript — 3/5 */}
         <section className="lg:col-span-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 max-h-[78vh] overflow-y-auto">
@@ -83,6 +90,7 @@ export default function App() {
           <Interject onInterject={stream.interject} disabled={!stream.connected} />
         </section>
       </main>
+      )}
     </div>
   )
 }

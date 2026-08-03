@@ -129,19 +129,45 @@ Required fields: `slug`, `name`, `websiteUrls` (≥1), `problemStatements` (≥1
 
 ### Step 4 — Run
 
-```bash
-# Headless (default)
-pnpm strategist:run -c config/events/my-event/event.json
+Three ways to run — pick the one that fits.
 
-# With the live control room — build the UI first, then:
+**1. Headless (no UI)**
+
+```bash
+pnpm strategist:run -c config/events/my-event/event.json
+```
+
+Runs the full pipeline and writes markdown artifacts to `output/<slug>/`.
+No browser needed.
+
+**2. Control room + config file (immediate run)**
+
+```bash
 pnpm build
 pnpm strategist:run -c config/events/my-event/event.json --ui
 # Open http://localhost:8787 to watch the run live
 ```
 
-In `--ui` mode the server starts **before** the run, replays the full event
-stream to any tab that connects, and keeps serving the finished transcript
-after the run completes (Ctrl-C to exit). Port: `CONTROL_ROOM_PORT` (default `8787`).
+The server starts **before** the run, replays the full event stream to any
+tab that connects, and keeps serving the finished transcript after the run
+completes (Ctrl-C to exit).
+
+**3. Control room — feed the event from the browser (interactive mode)**
+
+```bash
+pnpm build
+pnpm strategist:run --ui
+# Open http://localhost:8787 → fill in the form → Start run
+```
+
+Omit `--config` and the control room starts in **interactive mode** — no run
+begins until you submit the event info from the browser. The launch form
+covers every `EventConfig` field: event name, website URLs, problem
+statements, data files, sponsors, team size/skills, budgets, and gate
+checkpoints. A **JSON paste mode** lets you paste a full `config/events/*.json`
+instead of filling in the form.
+
+Port: `CONTROL_ROOM_PORT` (default `8787`).
 
 ### Control room
 
