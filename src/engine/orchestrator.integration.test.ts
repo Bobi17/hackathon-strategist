@@ -6,11 +6,13 @@
 // together without a gateway and produces a complete, valid artifact set.
 
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
-import { mkdtemp, readFile, rm, readdir } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { tmpdir } from 'node:os'
 import type { EventConfig } from '../config/types.js'
 import { Orchestrator } from './orchestrator.js'
+
+// Project-local scratch (gitignored) so tests never write outside the repo root.
+const SCRATCH_ROOT = join(process.cwd(), '.test-tmp')
 
 const ARTIFACTS = [
   'spec.md',
@@ -49,7 +51,8 @@ describe('Orchestrator end-to-end (stubs, no LLM)', () => {
     vi.stubEnv('OMNIROUTE_API_KEY', '')
     vi.stubEnv('LITELLM_API_KEY', '')
     vi.stubEnv('ANTHROPIC_API_KEY', '')
-    dir = await mkdtemp(join(tmpdir(), 'strategist-itest-'))
+    await mkdir(SCRATCH_ROOT, { recursive: true })
+    dir = await mkdtemp(join(SCRATCH_ROOT, 'strategist-itest-'))
   })
 
   afterAll(async () => {

@@ -5,6 +5,8 @@ node_modules/
 # build & test output
 dist/
 coverage/
+# integration-test scratch — project-local so tests never touch the OS temp dir
+.test-tmp/
 
 # the Strategist's generated artifacts — never commit a run
 output/
