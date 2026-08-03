@@ -1,0 +1,59 @@
+{
+  "version": "1.0.0",
+  "comment": "Hackathon Strategist context registry. Personas are runtime agent definitions (.agents/personas/); rules always apply; skills are Strategist-specific procedures. The shared vendor catalog lives in launchpad-ts/.agents — not duplicated here. Detailed contracts: IMPLEMENTATION_PLAN.md.",
+  "layers": {
+    "rules": ["engineering", "orchestration", "evidence"],
+    "personas": [
+      "orchestrator",
+      "event-intelligence-analyst",
+      "sponsor-stakeholder-analyst",
+      "past-winners-analyst",
+      "data-analyst",
+      "innovation-scout",
+      "devils-advocate",
+      "decision-lead",
+      "judge",
+      "sponsor-reviewer",
+      "audience-reviewer",
+      "build-feasibility-reviewer"
+    ],
+    "skills": ["web-ingest", "data-analysis", "debate-protocol"],
+    "specs": [],
+    "mcp": [],
+    "tools": {},
+    "references": [
+      "IMPORTANT: launchpad-ts/.agents hosts the shared vendor catalog (personas, skills, spec-kit). Reference, never duplicate."
+    ]
+  },
+  "personas": [
+    { "slug": "orchestrator", "category": "orchestration", "path": "personas/orchestration/orchestrator.md", "description": "Owns the run: stage transitions, budget governor, gate keeper, event-bus publisher, human-directive ingestion, escalation. The conductor of the deliberation." },
+    { "slug": "event-intelligence-analyst", "category": "research", "path": "personas/research/event-intelligence-analyst.md", "description": "Extracts event format, duration, tracks, tech requirements, submission rules, and dates from the ingested event website." },
+    { "slug": "sponsor-stakeholder-analyst", "category": "research", "path": "personas/research/sponsor-stakeholder-analyst.md", "description": "Researches sponsors (industries, goals, tracks, prizes), judges' backgrounds, and the audience profile; produces a stakeholder scorecard." },
+    { "slug": "past-winners-analyst", "category": "research", "path": "personas/research/past-winners-analyst.md", "description": "Analyzes what won this or similar events and why: patterns in domain, tech, production quality, and demo-ability, with citations." },
+    { "slug": "data-analyst", "category": "research", "path": "personas/research/data-analyst.md", "description": "Profiles provided datasets (schema, size, quality, distribution, signals) and maps which solution classes the data enables or precludes." },
+    { "slug": "innovation-scout", "category": "creation", "path": "personas/creation/innovation-scout.md", "description": "Divergent generation of 10-20 candidate idea cards spanning safe to bold, each mapped verbatim to the problem statement." },
+    { "slug": "devils-advocate", "category": "creation", "path": "personas/creation/devils-advocate.md", "description": "Adversarial critique of every candidate against research findings; forces rebuttals and kills weak ideas with cited reasons." },
+    { "slug": "decision-lead", "category": "decision", "path": "personas/decision/decision-lead.md", "description": "Applies reviewer feedback and human directives, runs the weighted scoring model, drives the loop, and drafts the markdown artifacts." },
+    { "slug": "judge", "category": "reviewer", "path": "personas/reviewer/judge.md", "description": "Rubric & gating expert: owns the event's scoring sheet (RUBRIC.md) and gating rules; returns criterion-by-criterion Approve/Revise verdicts." },
+    { "slug": "sponsor-reviewer", "category": "reviewer", "path": "personas/reviewer/sponsor-reviewer.md", "description": "Reviews each candidate from the sponsors' perspective: stated goals, challenge tracks, and prize criteria." },
+    { "slug": "audience-reviewer", "category": "reviewer", "path": "personas/reviewer/audience-reviewer.md", "description": "Reviews each candidate from the event audience/end-user perspective: demo-compelling, adoptable, first-paint wow." },
+    { "slug": "build-feasibility-reviewer", "category": "reviewer", "path": "personas/reviewer/build-feasibility-reviewer.md", "description": "Product/project manager lens: MVP decomposition, effort vs the build window and team size/skills, scope-cut proposals, risk flags." }
+  ],
+  "skills": [
+    { "name": "web-ingest", "path": "skills/web-ingest.md", "description": "Fetch and normalize hackathon website content: boilerplate stripping, nested/paginated pages, agenda/tracks/past-winners capture, cache." },
+    { "name": "data-analysis", "path": "skills/data-analysis.md", "description": "Profile provided datasets (csv/json/xlsx/pdf): schema, size, quality, distribution, signals, and a solution-leverage map." },
+    { "name": "debate-protocol", "path": "skills/debate-protocol.md", "description": "Run a structured debate round: critique, rebuttal, scoring, reviewer verdicts, feedback-to-revision traceability, termination rules." }
+  ],
+  "routing": {
+    "comment": "Task → context. Rules always apply. Shared/generic skills come from launchpad-ts.",
+    "orchestrate": { "personas": ["orchestrator"], "skills": [], "rules": ["orchestration"] },
+    "research": { "personas": ["event-intelligence-analyst", "sponsor-stakeholder-analyst", "past-winners-analyst", "data-analyst"], "skills": ["web-ingest", "data-analysis"], "rules": ["evidence"] },
+    "ideate": { "personas": ["innovation-scout"], "skills": [], "rules": ["evidence"] },
+    "debate": { "personas": ["devils-advocate", "decision-lead"], "skills": ["debate-protocol"], "rules": ["orchestration", "evidence"] },
+    "review": { "personas": ["judge", "sponsor-reviewer", "audience-reviewer", "build-feasibility-reviewer"], "skills": ["debate-protocol"], "rules": ["evidence"] },
+    "ui-build": { "personas": [], "skills": ["frontend-design"], "rules": ["engineering"] },
+    "backend": { "personas": [], "skills": [], "rules": ["engineering"] },
+    "qa": { "personas": [], "skills": ["webapp-testing"], "rules": [] },
+    "docs": { "personas": [], "skills": [], "rules": [] }
+  }
+}

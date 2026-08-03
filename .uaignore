@@ -1,0 +1,19 @@
+# Output artifacts
+output/
+dist/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Agent scratch
+.agent-logs/
+
+# OS / editor
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Lock file (large, generated)
+pnpm-lock.yaml

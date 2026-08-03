@@ -1,0 +1,24 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# build & test output
+dist/
+coverage/
+
+# the Strategist's generated artifacts — never commit a run
+output/
+
+# env & secrets
+.env
+.env.local
+.env.*.local
+
+# agent scratch
+.agent-logs/
+
+# os / editor
+.DS_Store
+*.log
+.vscode/
+.idea/

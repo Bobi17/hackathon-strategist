@@ -1,0 +1,29 @@
+{
+  "slug": "example",
+  "name": "Example AI Hackathon 2026",
+  "websiteUrls": ["https://example-hackathon.dev"],
+  "problemStatements": [
+    "Build an AI-powered solution for supply-chain visibility — help logistics teams predict and prevent disruptions before they happen."
+  ],
+  "dataFiles": [],
+  "sponsors": [
+    {
+      "name": "ACME Logistics",
+      "url": "https://acme-logistics.com",
+      "track": "Supply Chain AI",
+      "prize": "$10,000 + 6-month incubation"
+    }
+  ],
+  "pastWinnersUrls": ["https://example-hackathon.dev/2025-winners"],
+  "team": {
+    "size": 3,
+    "skills": ["typescript", "react", "llm", "data-visualization"]
+  },
+  "mode": "headless",
+  "budgets": {
+    "researchHours": 1,
+    "maxRounds": 2,
+    "perRoundMinutes": 10,
+    "continueWithoutPause": true
+  }
+}
