@@ -69,3 +69,19 @@ first-class artifacts (`decision-brief.md`, `approval-sheet.md`).
   acceptance criteria in `spec.md` §9 pass.
 - Control-room run is artifact-identical to the headless run.
 - `HANDOFF.md` updated; no stray files in `output/` or `.agent-logs/`.
+
+## 7. Knowledge Graph Maintenance
+
+The Understand-Anything knowledge graph (`.ua/`) is committed as living
+architecture docs: `knowledge-graph.json` (177 nodes / 348 edges), the guided
+tour (`intermediate/tour.json`), layer map (`intermediate/layers.json`), and
+`fingerprints.json`, which hashes every source file.
+
+After meaningful code changes, refresh it incrementally:
+
+- Run `/understand` (Understand-Anything plugin). The fingerprints detect which
+  files changed, so only the deltas are re-analyzed and the graph, tour, and
+  layers update in place — no full re-scan.
+- Commit the refreshed `.ua/` state in the same commit as the code change so the
+  graph never drifts from the source.
+- `.ua/tmp/` is transient scratch and gitignored — never commit it.

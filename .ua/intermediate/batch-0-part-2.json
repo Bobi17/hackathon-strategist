@@ -1,0 +1,1120 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/control-room/broker.ts",
+      "type": "file",
+      "name": "broker.ts",
+      "filePath": "src/control-room/broker.ts",
+      "summary": "DirectiveBroker routes human interjections from the control room to the targeted reviewer persona(s), tracking pending, shown, and consumed directives per deliberation round.",
+      "tags": [
+        "service",
+        "control-room",
+        "message-routing",
+        "human-directive"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/control-room/server.test.ts",
+      "type": "file",
+      "name": "server.test.ts",
+      "filePath": "src/control-room/server.test.ts",
+      "summary": "Integration tests for ControlRoomServer: WebSocket replay/streaming, interjections, gate approval/rejection/escalation, auto-resolve, and static UI serving.",
+      "tags": [
+        "test",
+        "integration-test",
+        "websocket",
+        "control-room"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/control-room/server.ts",
+      "type": "file",
+      "name": "server.ts",
+      "filePath": "src/control-room/server.ts",
+      "summary": "HTTP + WebSocket server that serves the built control-room UI, streams live event-bus events to clients, accepts interjections, and resolves human gates with timeout escalation.",
+      "tags": [
+        "server",
+        "websocket",
+        "http",
+        "event-streaming",
+        "control-room"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/control-room/ui/components.tsx",
+      "type": "file",
+      "name": "components.tsx",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "React components for the control room: stage rail, transcript feed, score board, verdict panel, gate controls, interject form, and status header.",
+      "tags": [
+        "component",
+        "react",
+        "ui",
+        "dashboard"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/control-room/ui/meta.ts",
+      "type": "file",
+      "name": "meta.ts",
+      "filePath": "src/control-room/ui/meta.ts",
+      "summary": "Persona display metadata (emoji, label, chip style) kept out of components so fast-refresh only re-renders the component file.",
+      "tags": [
+        "metadata",
+        "ui",
+        "persona",
+        "constants"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "file",
+      "name": "useStrategistStream.ts",
+      "filePath": "src/control-room/ui/useStrategistStream.ts",
+      "summary": "React hook bridging the control room to the strategist: connects a WebSocket, accumulates the full event stream, and exposes derived feed/rounds/gates state plus interject and resolveGate actions.",
+      "tags": [
+        "hook",
+        "react",
+        "websocket",
+        "state-management",
+        "event-stream"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/data/idea-pool.ts",
+      "type": "file",
+      "name": "idea-pool.ts",
+      "filePath": "src/data/idea-pool.ts",
+      "summary": "IdeaPool provides Map-backed storage for candidate idea cards with add, get, remove, replace-all, and snapshot operations.",
+      "tags": [
+        "data-model",
+        "collection",
+        "storage",
+        "idea"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/data/scoring.test.ts",
+      "type": "file",
+      "name": "scoring.test.ts",
+      "filePath": "src/data/scoring.test.ts",
+      "summary": "Unit tests for the weighted scoring engine: total computation, ranking, weight merging, progress detection, and sensitivity analysis.",
+      "tags": [
+        "test",
+        "unit-test",
+        "scoring",
+        "sensitivity-analysis"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/data/scoring.ts",
+      "type": "file",
+      "name": "scoring.ts",
+      "filePath": "src/data/scoring.ts",
+      "summary": "Weighted scoring engine that computes idea totals, ranks candidates with tie-breaking, detects round convergence, and runs sensitivity analysis to find load-bearing criteria.",
+      "tags": [
+        "scoring",
+        "ranking",
+        "algorithm",
+        "data-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/data/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "src/data/types.ts",
+      "summary": "Core domain types: personas, stages, idea cards, scores, verdicts, human directives, deliberation rounds, loop outcomes, and event-bus events, plus DEFAULT_WEIGHTS.",
+      "tags": [
+        "type-definition",
+        "data-model",
+        "domain",
+        "event"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/budget-governor.ts",
+      "type": "file",
+      "name": "budget-governor.ts",
+      "filePath": "src/engine/budget-governor.ts",
+      "summary": "BudgetGovernor enforces research time budgets and round caps, tracking elapsed research time, per-round timing, and remaining rounds.",
+      "tags": [
+        "budget",
+        "governor",
+        "engine",
+        "time-tracking"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/deliberation-loop.ts",
+      "type": "file",
+      "name": "deliberation-loop.ts",
+      "filePath": "src/engine/deliberation-loop.ts",
+      "summary": "Owns the iterative debate -> score -> review -> approve loop until reviewer approval or budget exhaustion, then computes the Top 3 and winner with dissent logging.",
+      "tags": [
+        "engine",
+        "deliberation",
+        "loop",
+        "orchestration",
+        "scoring"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/event-bus.ts",
+      "type": "file",
+      "name": "event-bus.ts",
+      "filePath": "src/engine/event-bus.ts",
+      "summary": "EventBus is the single source of truth for run events (emit, subscribe, replay, filter) and the globalBus singleton powers the transcript, loop log, and control-room WS stream.",
+      "tags": [
+        "event-bus",
+        "pub-sub",
+        "singleton",
+        "event-streaming"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/server.ts:createControlRoom",
+      "type": "function",
+      "name": "createControlRoom",
+      "filePath": "src/control-room/server.ts",
+      "lineRange": [
+        239,
+        242
+      ],
+      "summary": "Factory helper that creates a ControlRoomServer (convenience wrapper).",
+      "tags": [
+        "factory",
+        "server",
+        "control-room"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "function",
+      "name": "personaMeta",
+      "filePath": "src/control-room/ui/meta.ts",
+      "lineRange": [
+        21,
+        23
+      ],
+      "summary": "Returns display metadata (emoji, label, chip style) for a persona ID with a fallback entry.",
+      "tags": [
+        "metadata",
+        "ui",
+        "persona",
+        "lookup"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:StageRail",
+      "type": "function",
+      "name": "StageRail",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        20,
+        43
+      ],
+      "summary": "Renders the horizontal stage progress rail across all run stages.",
+      "tags": [
+        "component",
+        "react",
+        "stage",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:GateBadge",
+      "type": "function",
+      "name": "GateBadge",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        56,
+        67
+      ],
+      "summary": "Renders a small badge for a gate decision.",
+      "tags": [
+        "component",
+        "react",
+        "gate",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:Transcript",
+      "type": "function",
+      "name": "Transcript",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        69,
+        138
+      ],
+      "summary": "Renders the live transcript feed with persona messages, citations, and stage/round markers.",
+      "tags": [
+        "component",
+        "react",
+        "transcript",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "type": "function",
+      "name": "ScoreBoard",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        142,
+        173
+      ],
+      "summary": "Renders per-criterion scores for the selected deliberation round.",
+      "tags": [
+        "component",
+        "react",
+        "scoring",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "type": "function",
+      "name": "VerdictPanel",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        177,
+        207
+      ],
+      "summary": "Renders reviewer verdicts with feedback for the selected round.",
+      "tags": [
+        "component",
+        "react",
+        "verdict",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:GateControls",
+      "type": "function",
+      "name": "GateControls",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        211,
+        243
+      ],
+      "summary": "Renders approve/reject controls for the currently active gate.",
+      "tags": [
+        "component",
+        "react",
+        "gate",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:Interject",
+      "type": "function",
+      "name": "Interject",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        249,
+        296
+      ],
+      "summary": "Renders the interjection form for sending human directives to reviewer personas.",
+      "tags": [
+        "component",
+        "react",
+        "interject",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:StatusHeader",
+      "type": "function",
+      "name": "StatusHeader",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        300,
+        320
+      ],
+      "summary": "Renders connection status, run status, and event count in the control-room header.",
+      "tags": [
+        "component",
+        "react",
+        "status",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/useStrategistStream.ts:toFeedItem",
+      "type": "function",
+      "name": "toFeedItem",
+      "filePath": "src/control-room/ui/useStrategistStream.ts",
+      "lineRange": [
+        52,
+        65
+      ],
+      "summary": "Maps a raw StreamEvent onto a UI FeedItem, dropping unknown event kinds.",
+      "tags": [
+        "serialization",
+        "event",
+        "mapping",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "function",
+      "name": "useStrategistStream",
+      "filePath": "src/control-room/ui/useStrategistStream.ts",
+      "lineRange": [
+        67,
+        212
+      ],
+      "summary": "React hook bridging the control room to the strategist WS stream: accumulates events, derives feed/rounds/gates state, and exposes interject/resolveGate actions.",
+      "tags": [
+        "hook",
+        "react",
+        "websocket",
+        "state-management"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/data/scoring.ts:scoreIdea",
+      "type": "function",
+      "name": "scoreIdea",
+      "filePath": "src/data/scoring.ts",
+      "lineRange": [
+        20,
+        30
+      ],
+      "summary": "Computes a weighted total score for a single idea card from criterion scores and weights.",
+      "tags": [
+        "scoring",
+        "algorithm",
+        "weighted"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/data/scoring.ts:rank",
+      "type": "function",
+      "name": "rank",
+      "filePath": "src/data/scoring.ts",
+      "lineRange": [
+        36,
+        41
+      ],
+      "summary": "Sorts scores by total descending (tie-broken by ideaId) and stamps rank positions.",
+      "tags": [
+        "scoring",
+        "ranking",
+        "algorithm"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/data/scoring.ts:sensitivityAnalysis",
+      "type": "function",
+      "name": "sensitivityAnalysis",
+      "filePath": "src/data/scoring.ts",
+      "lineRange": [
+        49,
+        86
+      ],
+      "summary": "For each criterion, drops its weight to zero and re-ranks to measure how far the winner falls, identifying load-bearing criteria.",
+      "tags": [
+        "scoring",
+        "sensitivity-analysis",
+        "algorithm"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/data/scoring.ts:roundMadeProgress",
+      "type": "function",
+      "name": "roundMadeProgress",
+      "filePath": "src/data/scoring.ts",
+      "lineRange": [
+        92,
+        105
+      ],
+      "summary": "Detects whether a deliberation round made progress versus the prior one by checking revisions or score movement.",
+      "tags": [
+        "scoring",
+        "convergence",
+        "algorithm"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "function",
+      "name": "runDeliberationLoop",
+      "filePath": "src/engine/deliberation-loop.ts",
+      "lineRange": [
+        23,
+        139
+      ],
+      "summary": "Owns the iterative debate -> score -> review -> approve loop, enforcing budget and non-convergence exits, then computes Top 3 and winner.",
+      "tags": [
+        "engine",
+        "deliberation",
+        "loop",
+        "orchestration"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "class",
+      "name": "DirectiveBroker",
+      "filePath": "src/control-room/broker.ts",
+      "lineRange": [
+        17,
+        91
+      ],
+      "summary": "Routes human interjections to reviewer personas: registers directives, hands them out per round, archives shown sets, and drains consumed ones.",
+      "tags": [
+        "service",
+        "control-room",
+        "message-routing",
+        "human-directive"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "class",
+      "name": "ControlRoomServer",
+      "filePath": "src/control-room/server.ts",
+      "lineRange": [
+        47,
+        231
+      ],
+      "summary": "HTTP + WebSocket server serving the built control-room UI, streaming event-bus events, accepting interjections, and resolving human gates with timeout escalation.",
+      "tags": [
+        "server",
+        "websocket",
+        "control-room",
+        "event-streaming"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:src/data/idea-pool.ts:IdeaPool",
+      "type": "class",
+      "name": "IdeaPool",
+      "filePath": "src/data/idea-pool.ts",
+      "lineRange": [
+        5,
+        38
+      ],
+      "summary": "Map-backed store for candidate idea cards with add/get/remove/replace/snapshot operations.",
+      "tags": [
+        "data-model",
+        "collection",
+        "idea",
+        "storage"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/engine/budget-governor.ts:BudgetGovernor",
+      "type": "class",
+      "name": "BudgetGovernor",
+      "filePath": "src/engine/budget-governor.ts",
+      "lineRange": [
+        11,
+        61
+      ],
+      "summary": "Enforces research time budgets and round caps, tracking elapsed time and remaining rounds.",
+      "tags": [
+        "budget",
+        "governor",
+        "engine",
+        "time-tracking"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/engine/event-bus.ts:EventBus",
+      "type": "class",
+      "name": "EventBus",
+      "filePath": "src/engine/event-bus.ts",
+      "lineRange": [
+        9,
+        50
+      ],
+      "summary": "In-memory pub/sub event bus assigning sequence numbers, with subscribe/replay/filter, backing the run transcript and WS stream.",
+      "tags": [
+        "event-bus",
+        "pub-sub",
+        "event-streaming"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "function:src/control-room/server.ts:createControlRoom",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/meta.ts",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StageRail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:GateBadge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Transcript",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:GateControls",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Interject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StatusHeader",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:toFeedItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:scoreIdea",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:rank",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:sensitivityAnalysis",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:roundMadeProgress",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/broker.ts",
+      "target": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/idea-pool.ts",
+      "target": "class:src/data/idea-pool.ts:IdeaPool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/budget-governor.ts",
+      "target": "class:src/engine/budget-governor.ts:BudgetGovernor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/event-bus.ts",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "function:src/control-room/server.ts:createControlRoom",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/meta.ts",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StageRail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Transcript",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:GateControls",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Interject",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StatusHeader",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:scoreIdea",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:rank",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:sensitivityAnalysis",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:roundMadeProgress",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/broker.ts",
+      "target": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/idea-pool.ts",
+      "target": "class:src/data/idea-pool.ts:IdeaPool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/budget-governor.ts",
+      "target": "class:src/engine/budget-governor.ts:BudgetGovernor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/event-bus.ts",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/broker.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "file:src/control-room/ui/meta.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/meta.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/data/idea-pool.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/data/scoring.test.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/data/scoring.test.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/budget-governor.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/engine/budget-governor.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/event-bus.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "target": "function:src/data/scoring.ts:scoreIdea",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "target": "function:src/data/scoring.ts:rank",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "target": "function:src/data/scoring.ts:roundMadeProgress",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/control-room/ui/components.tsx:Transcript",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/control-room/server.ts:ControlRoomServer",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/control-room/server.ts:ControlRoomServer",
+      "target": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/broker.ts",
+      "target": "file:src/control-room/broker.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/control-room/server.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/engine/event-bus.ts",
+      "target": "file:src/control-room/server.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "file:src/data/scoring.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

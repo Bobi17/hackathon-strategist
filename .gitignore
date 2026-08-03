@@ -16,6 +16,8 @@ output/
 
 # agent scratch
 .agent-logs/
+# understand-anything transient scratch — the knowledge graph itself is committed
+.ua/tmp/
 
 # os / editor
 .DS_Store

@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "project": "Hackathon Strategist",
+  "generatedAt": "2026-08-02T22:46:31.560Z",
+  "commit": "HEAD\nunknown",
+  "nodeCount": 177,
+  "edgeCount": 348,
+  "layerCount": 10,
+  "tourSteps": 12,
+  "fingerprintCount": 85,
+  "schema": "understand-anything/1.0",
+  "layers": [
+    "layer:entry",
+    "layer:control-room",
+    "layer:engine",
+    "layer:agents",
+    "layer:research",
+    "layer:data",
+    "layer:config",
+    "layer:agent-personas",
+    "layer:documentation",
+    "layer:output"
+  ]
+}

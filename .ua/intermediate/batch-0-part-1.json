@@ -1,0 +1,1253 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/App.tsx",
+      "type": "file",
+      "name": "App.tsx",
+      "filePath": "src/App.tsx",
+      "summary": "Root React component for the control room UI, wiring the live strategist WebSocket stream into the stage rail, transcript, score board, verdict panel, gate controls, and interject form.",
+      "tags": [
+        "component",
+        "react",
+        "ui",
+        "control-room"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/agents/llm.ts",
+      "type": "file",
+      "name": "llm.ts",
+      "filePath": "src/agents/llm.ts",
+      "summary": "LLM client with multi-provider support (Anthropic SDK, OmniRoute, LiteLLM) auto-detected from environment variables, with retry logic and resilient JSON extraction that salvages truncated model output.",
+      "tags": [
+        "llm",
+        "api-client",
+        "provider",
+        "serialization"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/agents/registry.ts",
+      "type": "file",
+      "name": "registry.ts",
+      "filePath": "src/agents/registry.ts",
+      "summary": "Loads persona metadata (YAML frontmatter) from the .agents/personas directory tree and provides lookup by slug for the orchestrator.",
+      "tags": [
+        "registry",
+        "persona",
+        "loader",
+        "metadata"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/agents/runner.ts",
+      "type": "file",
+      "name": "runner.ts",
+      "filePath": "src/agents/runner.ts",
+      "summary": "Persona runner that loads persona markdown files, executes them through the LLM with an optional tool-use loop, and returns raw plus parsed JSON output.",
+      "tags": [
+        "agent-runner",
+        "persona",
+        "llm",
+        "tool-use"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/agents/structured.test.ts",
+      "type": "file",
+      "name": "structured.test.ts",
+      "filePath": "src/agents/structured.test.ts",
+      "summary": "Vitest unit tests for the structured-output coercion helpers (idea cards, findings, verdicts, debate messages, scores) and JSON extraction robustness.",
+      "tags": [
+        "test",
+        "unit-test",
+        "serialization",
+        "json"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/agents/structured.ts",
+      "type": "file",
+      "name": "structured.ts",
+      "filePath": "src/agents/structured.ts",
+      "summary": "Lenient coercion of persona LLM JSON into typed domain objects, defaulting missing fields and rejecting garbage entries so the engine never crashes on malformed output.",
+      "tags": [
+        "serialization",
+        "validation",
+        "type-coercion",
+        "data-model"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/agents/tools.ts",
+      "type": "file",
+      "name": "tools.ts",
+      "filePath": "src/agents/tools.ts",
+      "summary": "Tool registry exposing webFetch, readFile, csvParse, and summarize tools that persona runs can invoke during research.",
+      "tags": [
+        "tool",
+        "registry",
+        "web-scraping",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/artifacts/writer.ts",
+      "type": "file",
+      "name": "writer.ts",
+      "filePath": "src/artifacts/writer.ts",
+      "summary": "Writes the full set of markdown artifacts (spec, implementation plan, executive summary, shortlist, evidence dossier, loop log, approval sheet, decision brief) after a completed run.",
+      "tags": [
+        "artifact",
+        "markdown",
+        "report-generation",
+        "output"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/config/defaults.ts",
+      "type": "file",
+      "name": "defaults.ts",
+      "filePath": "src/config/defaults.ts",
+      "summary": "Default values for optional event configuration fields (output directory, concurrency, mode, budgets, gates, team).",
+      "tags": [
+        "config",
+        "defaults",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/config/env.ts",
+      "type": "file",
+      "name": "env.ts",
+      "filePath": "src/config/env.ts",
+      "summary": "Loads .env.local into process.env once at startup (shell exports win) and provides fail-fast access to required environment variables.",
+      "tags": [
+        "config",
+        "environment",
+        "validation",
+        "bootstrap"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/config/schema.ts",
+      "type": "file",
+      "name": "schema.ts",
+      "filePath": "src/config/schema.ts",
+      "summary": "Validates event configuration JSON field-by-field without external libraries and loads it, throwing with all validation errors when invalid.",
+      "tags": [
+        "config",
+        "validation",
+        "schema",
+        "loader"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/config/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "src/config/types.ts",
+      "summary": "TypeScript type definitions for event configuration: EventConfig, budgets, gates, team, sponsors, and strategy mode.",
+      "tags": [
+        "type-definition",
+        "config",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/control-room/broker.test.ts",
+      "type": "file",
+      "name": "broker.test.ts",
+      "filePath": "src/control-room/broker.test.ts",
+      "summary": "Unit tests for DirectiveBroker covering interjection routing, broadcast semantics, round archiving, and lifecycle reset.",
+      "tags": [
+        "test",
+        "unit-test",
+        "control-room",
+        "directive"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/App.tsx:App",
+      "type": "function",
+      "name": "App",
+      "filePath": "src/App.tsx",
+      "lineRange": [
+        18,
+        88
+      ],
+      "summary": "Root control-room component composing stage rail, transcript, score board, verdict panel, gate controls, and interject form around the live strategist stream.",
+      "tags": [
+        "component",
+        "react",
+        "ui",
+        "control-room"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/llm.ts:detectProvider",
+      "type": "function",
+      "name": "detectProvider",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        68,
+        76
+      ],
+      "summary": "Detects the configured LLM provider from environment variables with priority OmniRoute > LiteLLM > Anthropic, throwing if none is set.",
+      "tags": [
+        "provider",
+        "detection",
+        "llm",
+        "config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/llm.ts:callAnthropic",
+      "type": "function",
+      "name": "callAnthropic",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        91,
+        116
+      ],
+      "summary": "Calls the Anthropic SDK with retry and token accounting for a single system/user message pair.",
+      "tags": [
+        "llm",
+        "anthropic",
+        "api-client"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/llm.ts:callOpenAICompatible",
+      "type": "function",
+      "name": "callOpenAICompatible",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        120,
+        168
+      ],
+      "summary": "Calls an OpenAI-compatible gateway (OmniRoute/LiteLLM) chat-completions endpoint with retry and token accounting.",
+      "tags": [
+        "llm",
+        "openai-compatible",
+        "gateway",
+        "api-client"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/llm.ts:callLLM",
+      "type": "function",
+      "name": "callLLM",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        179,
+        214
+      ],
+      "summary": "Main LLM entry point dispatching to the detected provider with retry and temperature/max-token options.",
+      "tags": [
+        "llm",
+        "dispatch",
+        "api-client"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/llm.ts:extractJSON",
+      "type": "function",
+      "name": "extractJSON",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        225,
+        278
+      ],
+      "summary": "Extracts JSON from persona text, stripping fences and prose, and repairs truncated or unescaped payloads.",
+      "tags": [
+        "json",
+        "parsing",
+        "recovery",
+        "serialization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/llm.ts:salvageTruncatedJSON",
+      "type": "function",
+      "name": "salvageTruncatedJSON",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        287,
+        341
+      ],
+      "summary": "Attempts to repair truncated or unescaped JSON by balancing braces and closing open strings.",
+      "tags": [
+        "json",
+        "recovery",
+        "parsing",
+        "robustness"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/registry.ts:loadAllPersonas",
+      "type": "function",
+      "name": "loadAllPersonas",
+      "filePath": "src/agents/registry.ts",
+      "lineRange": [
+        22,
+        56
+      ],
+      "summary": "Loads persona frontmatter metadata from every category directory under .agents/personas/.",
+      "tags": [
+        "persona",
+        "registry",
+        "loader",
+        "metadata"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/registry.ts:findPersona",
+      "type": "function",
+      "name": "findPersona",
+      "filePath": "src/agents/registry.ts",
+      "lineRange": [
+        61,
+        64
+      ],
+      "summary": "Looks up a persona by slug across all categories.",
+      "tags": [
+        "persona",
+        "lookup",
+        "registry"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/runner.ts:loadPersona",
+      "type": "function",
+      "name": "loadPersona",
+      "filePath": "src/agents/runner.ts",
+      "lineRange": [
+        32,
+        55
+      ],
+      "summary": "Reads a persona markdown file and parses its YAML frontmatter into a PersonaFile.",
+      "tags": [
+        "persona",
+        "loader",
+        "frontmatter"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/runner.ts:runPersona",
+      "type": "function",
+      "name": "runPersona",
+      "filePath": "src/agents/runner.ts",
+      "lineRange": [
+        73,
+        143
+      ],
+      "summary": "Runs a persona through the LLM with an optional tool-use loop, parsing JSON output and returning the raw plus parsed result.",
+      "tags": [
+        "persona",
+        "llm",
+        "tool-use",
+        "runner"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/runner.ts:runPersonaById",
+      "type": "function",
+      "name": "runPersonaById",
+      "filePath": "src/agents/runner.ts",
+      "lineRange": [
+        148,
+        159
+      ],
+      "summary": "Convenience wrapper that maps a persona ID to its file and runs it, stamping the persona on the result.",
+      "tags": [
+        "persona",
+        "dispatch",
+        "runner"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "function",
+      "name": "toIdeaCards",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        42,
+        68
+      ],
+      "summary": "Coerces raw LLM JSON into IdeaCard objects, handling arrays, {ideas:[]} wrappers, aliases, and auto-ids.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "idea",
+        "parsing"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toFindings",
+      "type": "function",
+      "name": "toFindings",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        74,
+        100
+      ],
+      "summary": "Coerces research findings JSON into typed ResearchFinding objects with evidence confidence defaults.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "research",
+        "parsing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toVerdict",
+      "type": "function",
+      "name": "toVerdict",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        106,
+        133
+      ],
+      "summary": "Coerces reviewer JSON into ReviewerVerdict objects, normalizing verdict values and feedback items.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "review",
+        "parsing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toDebateMessages",
+      "type": "function",
+      "name": "toDebateMessages",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        139,
+        164
+      ],
+      "summary": "Coerces debate JSON into DebateMessage objects with persona fallbacks.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "debate",
+        "parsing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/structured.ts:extractCriteria",
+      "type": "function",
+      "name": "extractCriteria",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        176,
+        188
+      ],
+      "summary": "Extracts and validates a score-criteria map from a raw record, returning null for non-genuine score objects.",
+      "tags": [
+        "serialization",
+        "validation",
+        "scoring"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toScores",
+      "type": "function",
+      "name": "toScores",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        199,
+        237
+      ],
+      "summary": "Coerces score JSON (array or map form) into typed Score objects, rejecting garbage entries and filtering to known idea IDs.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "scoring",
+        "validation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/tools.ts:stripBoilerplate",
+      "type": "function",
+      "name": "stripBoilerplate",
+      "filePath": "src/agents/tools.ts",
+      "lineRange": [
+        43,
+        54
+      ],
+      "summary": "Removes script/style/nav/footer/header blocks and HTML tags, collapsing whitespace for webFetch output.",
+      "tags": [
+        "html",
+        "cleaning",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/tools.ts:execTool",
+      "type": "function",
+      "name": "execTool",
+      "filePath": "src/agents/tools.ts",
+      "lineRange": [
+        126,
+        133
+      ],
+      "summary": "Dispatches a tool call by name to the tool registry, returning a ToolResult.",
+      "tags": [
+        "tool",
+        "dispatch",
+        "registry"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:writeArtifacts",
+      "type": "function",
+      "name": "writeArtifacts",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        26,
+        52
+      ],
+      "summary": "Writes the full eight-file markdown artifact set for a completed run to output/<slug>/.",
+      "tags": [
+        "artifact",
+        "writer",
+        "markdown",
+        "output"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderSpec",
+      "type": "function",
+      "name": "renderSpec",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        56,
+        108
+      ],
+      "summary": "Renders the winning solution spec markdown from the event config and winner.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "spec"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderImplementationPlan",
+      "type": "function",
+      "name": "renderImplementationPlan",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        110,
+        136
+      ],
+      "summary": "Renders the implementation-plan markdown from the run outcome.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "plan"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderShortlist",
+      "type": "function",
+      "name": "renderShortlist",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        149,
+        165
+      ],
+      "summary": "Renders the Top-3 shortlist table with per-criterion scores.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "shortlist",
+        "scoring"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderLoopLog",
+      "type": "function",
+      "name": "renderLoopLog",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        167,
+        188
+      ],
+      "summary": "Renders a chronological log of deliberation rounds for the loop-log artifact.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "loop-log"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderApprovalSheet",
+      "type": "function",
+      "name": "renderApprovalSheet",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        190,
+        209
+      ],
+      "summary": "Renders the reviewer approval sheet listing per-reviewer verdicts.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "approval"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderDecisionBrief",
+      "type": "function",
+      "name": "renderDecisionBrief",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        211,
+        247
+      ],
+      "summary": "Renders the decision brief summarizing the winner, dissent, and weight sensitivity.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "decision",
+        "sensitivity"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/config/env.ts:loadEnv",
+      "type": "function",
+      "name": "loadEnv",
+      "filePath": "src/config/env.ts",
+      "lineRange": [
+        19,
+        29
+      ],
+      "summary": "Idempotently loads .env.local into process.env without overwriting existing values.",
+      "tags": [
+        "env",
+        "config",
+        "bootstrap"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/config/env.ts:requireEnv",
+      "type": "function",
+      "name": "requireEnv",
+      "filePath": "src/config/env.ts",
+      "lineRange": [
+        36,
+        44
+      ],
+      "summary": "Returns a required environment variable or throws with a pointer to .env.local.",
+      "tags": [
+        "env",
+        "validation",
+        "config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/config/schema.ts:validateConfig",
+      "type": "function",
+      "name": "validateConfig",
+      "filePath": "src/config/schema.ts",
+      "lineRange": [
+        12,
+        71
+      ],
+      "summary": "Validates an EventConfig object field-by-field, returning a list of errors (empty when valid).",
+      "tags": [
+        "config",
+        "validation",
+        "schema"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/config/schema.ts:loadConfig",
+      "type": "function",
+      "name": "loadConfig",
+      "filePath": "src/config/schema.ts",
+      "lineRange": [
+        77,
+        85
+      ],
+      "summary": "Loads and validates an event config JSON file, throwing with all validation errors if invalid.",
+      "tags": [
+        "config",
+        "loader",
+        "validation"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/App.tsx",
+      "target": "function:src/App.tsx:App",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:detectProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:callAnthropic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:callOpenAICompatible",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:callLLM",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:extractJSON",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:salvageTruncatedJSON",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/registry.ts",
+      "target": "function:src/agents/registry.ts:loadAllPersonas",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/registry.ts",
+      "target": "function:src/agents/registry.ts:findPersona",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:loadPersona",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersona",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toFindings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toVerdict",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toDebateMessages",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:extractCriteria",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toScores",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/tools.ts",
+      "target": "function:src/agents/tools.ts:stripBoilerplate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/tools.ts",
+      "target": "function:src/agents/tools.ts:execTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:writeArtifacts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderSpec",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderImplementationPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderShortlist",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderLoopLog",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderApprovalSheet",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderDecisionBrief",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/env.ts",
+      "target": "function:src/config/env.ts:loadEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/env.ts",
+      "target": "function:src/config/env.ts:requireEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:validateConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:loadConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "function:src/App.tsx:App",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:detectProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:callLLM",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:extractJSON",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/registry.ts",
+      "target": "function:src/agents/registry.ts:loadAllPersonas",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/registry.ts",
+      "target": "function:src/agents/registry.ts:findPersona",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:loadPersona",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersona",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toFindings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toVerdict",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toDebateMessages",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toScores",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/tools.ts",
+      "target": "function:src/agents/tools.ts:execTool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:writeArtifacts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/config/env.ts",
+      "target": "function:src/config/env.ts:loadEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/config/env.ts",
+      "target": "function:src/config/env.ts:requireEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:validateConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:loadConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/control-room/ui/components.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "file:src/config/env.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "file:src/agents/tools.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/structured.test.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/structured.test.ts",
+      "target": "file:src/agents/structured.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/config/defaults.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/config/types.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/broker.test.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersona",
+      "target": "function:src/agents/llm.ts:callLLM",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersona",
+      "target": "function:src/agents/llm.ts:extractJSON",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersona",
+      "target": "function:src/agents/tools.ts:execTool",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersonaById",
+      "target": "function:src/agents/runner.ts:loadPersona",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersonaById",
+      "target": "function:src/agents/runner.ts:runPersona",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/App.tsx:App",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "file:src/agents/structured.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "file:src/agents/structured.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

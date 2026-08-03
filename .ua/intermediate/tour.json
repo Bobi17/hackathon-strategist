@@ -1,0 +1,81 @@
+[
+  {
+    "order": 1,
+    "title": "Project Overview",
+    "description": "The README explains what the Hackathon Strategist is: a multi-agent research and ideation system that ingests an event's website, problem statements, and datasets; researches sponsors, judges, audience, and past winners; generates candidate ideas; and then runs a debate-and-refine loop until a panel of reviewer personas approves a Top 3 and a winning solution. It also maps the runtime: an orchestrator driving staged personas, an event bus streaming to a live React control room, and a set of markdown artifacts (spec.md, implementation-plan.md) as the final deliverable. This is your roadmap for everything that follows.",
+    "nodeIds": ["document:README.md"]
+  },
+  {
+    "order": 2,
+    "title": "Application Entry Points",
+    "description": "main.ts is the CLI bootstrap: it loads environment and event configuration, detects the LLM provider, optionally launches the control-room server, runs the Orchestrator, and reports the run outcome. main.tsx is the other face of the system, a thin React entry point that mounts the control-room UI. Together they reveal the project's dual nature - a headless, scriptable pipeline and a live monitoring surface - both funneling into the same engine you will explore next.",
+    "nodeIds": ["file:src/main.ts", "file:src/main.tsx"],
+    "languageLesson": "main.ts relies on TypeScript ESM top-level await (enabled by \"type\": \"module\" in package.json), which lets bootstrap logic run sequentially at module scope instead of being wrapped in an async main() call."
+  },
+  {
+    "order": 3,
+    "title": "Configuration System",
+    "description": "Every run is driven by configuration, so the entry point's first job is to load it. config/types.ts defines the EventConfig shape - budgets, gates, team, sponsors, and strategy mode - that all engine layers depend on. schema.ts validates the event JSON field-by-field without external libraries, collecting every validation error before throwing. env.ts loads .env.local once and fails fast on missing variables. The example event config is a concrete instance of this schema you can trace through the rest of the tour.",
+    "nodeIds": ["file:src/config/types.ts", "file:src/config/schema.ts", "file:src/config/env.ts", "config:config/events/example.json"],
+    "languageLesson": "The config layer uses a fail-fast pattern: env.ts reads required variables at import time so a misconfigured deployment crashes at startup with a clear message instead of failing deep inside a run."
+  },
+  {
+    "order": 4,
+    "title": "Domain Data & Scoring",
+    "description": "data/types.ts is the single most-depended-upon file in the codebase (fan-in of 17), defining the shared vocabulary: personas, stages, idea cards, scores, verdicts, human directives, deliberation rounds, and the event-bus event types that every layer imports. idea-pool.ts provides the in-memory Map storage for candidate idea cards, while scoring.ts implements the weighted scoring engine with ranking, convergence detection, and sensitivity analysis. Understanding this step's types makes every later module far easier to read.",
+    "nodeIds": ["file:src/data/types.ts", "file:src/data/idea-pool.ts", "file:src/data/scoring.ts"],
+    "languageLesson": "The event types here lean on TypeScript discriminated unions: a shared 'type' discriminant field plus a typed payload lets the event bus switch exhaustively over event kinds, so the compiler catches any unhandled case."
+  },
+  {
+    "order": 5,
+    "title": "Orchestration Engine",
+    "description": "Orchestrator is the run controller and the hub of the entire system. It drives the staged pipeline - ingest, research, synthesize, ideate, loop, finalize, artifacts - and wires together the persona callbacks, budget governor, event bus, gates, and the control-room server. With a fan-out of 15, it is the broadest-scope module: nearly every other source file is reachable from here, which is exactly why the BFS traversal from main.ts lands on it at depth 1.",
+    "nodeIds": ["file:src/engine/orchestrator.ts"]
+  },
+  {
+    "order": 6,
+    "title": "Run Lifecycle & Deliberation",
+    "description": "Where the Orchestrator decides what happens, these four modules define how it happens. StageMachine drives the run through ordered stages, emitting a stage event at each transition. EventBus is the single source of truth for run events - its globalBus singleton powers the transcript, loop log, and control-room WebSocket stream. The deliberation-loop owns the iterative debate-to-score-to-review-to-approve cycle, computing the Top 3 and winner when reviewers approve or the budget runs out. BudgetGovernor enforces research time budgets and round caps, giving the loop its stopping conditions.",
+    "nodeIds": ["file:src/engine/stage-machine.ts", "file:src/engine/event-bus.ts", "file:src/engine/deliberation-loop.ts", "file:src/engine/budget-governor.ts"]
+  },
+  {
+    "order": 7,
+    "title": "Agent Execution",
+    "description": "The engine decides what to do, but the personas actually do it - and this step is the machinery in between. persona-tasks.ts (the highest fan-out file in the project) provides the engine-level callbacks that run each persona and coerce its JSON, degrading to deterministic stubs on failure. llm.ts is the multi-provider LLM client (Anthropic SDK, OmniRoute, LiteLLM) with retry logic. runner.ts loads a persona's markdown definition and executes it through the LLM, while structured.ts leniently coerces the model's JSON into the typed domain objects from Step 4. tools.ts registers webFetch, readFile, csvParse, and summarize for research-time tool use.",
+    "nodeIds": ["file:src/engine/persona-tasks.ts", "file:src/agents/llm.ts", "file:src/agents/runner.ts", "file:src/agents/structured.ts", "file:src/agents/tools.ts"],
+    "languageLesson": "LLM output is unreliable JSON, so llm.ts uses resilient extraction: it first tries to parse a complete JSON object, then attempts to salvage truncated model output by re-balancing brackets before giving up and letting the persona call degrade to a stub."
+  },
+  {
+    "order": 8,
+    "title": "Agent Personas",
+    "description": "This is the multi-agent system's brain: the definitions that make each of the 12 personas behave differently. registry.ts scans the .agents/personas directory tree, parsing YAML frontmatter for metadata and providing lookup by slug; the registry.json file declares the persona catalog. The personas themselves are markdown documents - the orchestrator coordinates the run, the data-analyst pursues research, and the judge enforces the rubric - that runner.ts from Step 7 executes as prompts. These documents are the product of the system, in a real sense: they encode the strategy expertise.",
+    "nodeIds": ["file:src/agents/registry.ts", "config:.agents/registry.json", "document:.agents/personas/orchestration/orchestrator.md", "document:.agents/personas/research/data-analyst.md", "document:.agents/personas/reviewer/judge.md"],
+    "languageLesson": "Agents are defined as markdown files with YAML frontmatter - the frontmatter holds metadata (slug, role, model, skills) that registry.ts parses, while the body is the persona's system prompt. This keeps agent definitions data-driven and editable without touching TypeScript."
+  },
+  {
+    "order": 9,
+    "title": "Research Ingestion",
+    "description": "The research personas from Step 8 need raw material, and ingest.ts is how the system gets it. It fetches the event website and rubric and past-winner URLs, normalizes the HTML, reads local data files, caches site content, and flags missing inputs so the run degrades gracefully. parsers/html.ts strips script, style, nav, and footer blocks and collapses whitespace into clean readable text that an LLM can actually consume. This pipeline runs in the first stage of the Orchestrator (Step 5) and feeds the data-analyst personas.",
+    "nodeIds": ["file:src/research/ingest.ts", "file:src/research/parsers/html.ts"]
+  },
+  {
+    "order": 10,
+    "title": "Control Room",
+    "description": "The control room is the live-ops layer first mentioned in the README and launched from main.ts. server.ts serves the built React UI over HTTP and streams event-bus events over WebSocket, accepting human interjections and resolving gates with timeout escalation. broker.ts routes those interjections to the targeted reviewer persona(s). On the frontend, useStrategistStream.ts is the React hook that connects to the WebSocket and accumulates the event stream, while components.tsx renders the stage rail, transcript, score board, verdict panel, and gate controls. This step ties the event bus from Step 6 to a real-time human interface.",
+    "nodeIds": ["file:src/control-room/server.ts", "file:src/control-room/broker.ts", "file:src/control-room/ui/useStrategistStream.ts", "file:src/control-room/ui/components.tsx"],
+    "languageLesson": "The UI uses a single custom hook (useStrategistStream) as the WebSocket bridge: it owns the connection lifecycle, replays the accumulated event history, and exposes derived state plus interject and resolveGate actions - the hook pattern keeps the socket logic out of components entirely."
+  },
+  {
+    "order": 11,
+    "title": "Artifacts & Output",
+    "description": "After the deliberation loop converges, writer.ts produces the system's actual deliverables: spec.md, implementation plan, executive summary, shortlist, evidence dossier, loop log, approval sheet, and decision brief. The example output documents show what a completed run looks like - the spec that a build team can execute immediately and the decision brief that records how the winning idea was chosen. This is the 'tell us what to build to win' promise from Step 1, made concrete.",
+    "nodeIds": ["file:src/artifacts/writer.ts", "document:output/example/spec.md", "document:output/example/decision-brief.md"]
+  },
+  {
+    "order": 12,
+    "title": "Build & Deployment",
+    "description": "package.json ties the project together as a runnable product: it defines the strategist:run CLI script, the React build for the control room, and the test tooling used across the codebase. vercel.json configures deployment of the control-room UI to Vercel, completing the journey from a CLI-driven research pipeline to a deployable web surface.",
+    "nodeIds": ["config:package.json", "config:vercel.json"],
+    "languageLesson": "Because the Strategist runs as a CLI rather than a server, only the control-room UI is deployed; vercel.json uses a rewrite rule so SPA client-side routing falls back to index.html."
+  }
+]

@@ -1,0 +1,1151 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/engine/orchestrator.integration.test.ts",
+      "type": "file",
+      "name": "orchestrator.integration.test.ts",
+      "filePath": "src/engine/orchestrator.integration.test.ts",
+      "summary": "End-to-end Orchestrator test running the full pipeline on deterministic stubs with no LLM provider, verifying all eight markdown artifacts are produced with real structure.",
+      "tags": [
+        "test",
+        "integration-test",
+        "orchestrator",
+        "pipeline"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/orchestrator.ts",
+      "type": "file",
+      "name": "orchestrator.ts",
+      "filePath": "src/engine/orchestrator.ts",
+      "summary": "Orchestrator is the run controller: drives the staged pipeline (ingest, research, synthesize, ideate, loop, finalize, artifacts), wires persona callbacks, budget, event bus, gates, and the control-room server.",
+      "tags": [
+        "entry-point",
+        "orchestrator",
+        "engine",
+        "pipeline",
+        "run-controller"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/persona-tasks.test.ts",
+      "type": "file",
+      "name": "persona-tasks.test.ts",
+      "filePath": "src/engine/persona-tasks.test.ts",
+      "summary": "Tests the persona-tasks empty-output retry behavior, mocking the runner to assert retry-then-degrade semantics for research personas.",
+      "tags": [
+        "test",
+        "unit-test",
+        "persona",
+        "retry",
+        "resilience"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/persona-tasks.ts",
+      "type": "file",
+      "name": "persona-tasks.ts",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "LLM-wired persona tasks: research, synthesis, ideation, debate, scoring, and review callbacks that run personas and coerce JSON, degrading to deterministic stubs on failure.",
+      "tags": [
+        "persona",
+        "llm",
+        "orchestration",
+        "callback",
+        "resilience"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/engine/stage-machine.ts",
+      "type": "file",
+      "name": "stage-machine.ts",
+      "filePath": "src/engine/stage-machine.ts",
+      "summary": "StageMachine drives the run through ordered stages, emitting a stage event on the bus at each transition with current/isPast/isDone queries.",
+      "tags": [
+        "state-machine",
+        "engine",
+        "stage",
+        "event-bus"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main.ts",
+      "type": "file",
+      "name": "main.ts",
+      "filePath": "src/main.ts",
+      "summary": "CLI entry point that loads environment and config, detects the LLM provider, optionally launches the control-room server, runs the Orchestrator, and reports the outcome.",
+      "tags": [
+        "entry-point",
+        "cli",
+        "bootstrap",
+        "run"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/main.tsx",
+      "type": "file",
+      "name": "main.tsx",
+      "filePath": "src/main.tsx",
+      "summary": "React entry point that mounts the control-room App into the DOM under StrictMode.",
+      "tags": [
+        "entry-point",
+        "react",
+        "bootstrap",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/research/ingest.ts",
+      "type": "file",
+      "name": "ingest.ts",
+      "filePath": "src/research/ingest.ts",
+      "summary": "Ingestion pipeline that fetches event websites and rubric/past-winner URLs, normalizes HTML, reads local data files, caches site content, and flags missing inputs.",
+      "tags": [
+        "ingestion",
+        "research",
+        "web-fetch",
+        "caching",
+        "pipeline"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/research/parsers/csv.ts",
+      "type": "file",
+      "name": "csv.ts",
+      "filePath": "src/research/parsers/csv.ts",
+      "summary": "CSV profiler that parses a dataset file with csv-parse and returns headers plus up to 50 sample rows.",
+      "tags": [
+        "parser",
+        "csv",
+        "data",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/research/parsers/html.ts",
+      "type": "file",
+      "name": "html.ts",
+      "filePath": "src/research/parsers/html.ts",
+      "summary": "HTML normalizer that strips script/style/nav/footer/header blocks, removes tags, decodes entities, and collapses whitespace into clean readable text.",
+      "tags": [
+        "parser",
+        "html",
+        "text-extraction",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/test/setup.ts",
+      "type": "file",
+      "name": "setup.ts",
+      "filePath": "src/test/setup.ts",
+      "summary": "Vitest setup file providing a baseline (currently empty) test bootstrap.",
+      "tags": [
+        "test",
+        "setup",
+        "config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/vite-env.d.ts",
+      "type": "file",
+      "name": "vite-env.d.ts",
+      "filePath": "src/vite-env.d.ts",
+      "summary": "Vite client type reference declaration for the project.",
+      "tags": [
+        "type-definition",
+        "vite",
+        "environment"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/engine/orchestrator.integration.test.ts:makeConfig",
+      "type": "function",
+      "name": "makeConfig",
+      "filePath": "src/engine/orchestrator.integration.test.ts",
+      "lineRange": [
+        26,
+        41
+      ],
+      "summary": "Builds an EventConfig fixture for the orchestrator integration test run.",
+      "tags": [
+        "test",
+        "fixture",
+        "config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:tryRun",
+      "type": "function",
+      "name": "tryRun",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        37,
+        69
+      ],
+      "summary": "Runs a persona via the runner with one retry on empty output, degrading to null on failure.",
+      "tags": [
+        "persona",
+        "llm",
+        "retry",
+        "resilience"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "function",
+      "name": "runResearch",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        136,
+        170
+      ],
+      "summary": "Runs the four research personas in parallel and coalesces findings into a ResearchResult with evidence text and degraded flags.",
+      "tags": [
+        "persona",
+        "research",
+        "parallel",
+        "llm"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "function",
+      "name": "synthesizeFindings",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        181,
+        195
+      ],
+      "summary": "Runs the decision-lead persona to synthesize research findings into a strategy summary.",
+      "tags": [
+        "persona",
+        "synthesis",
+        "llm"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "function",
+      "name": "ideate",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        199,
+        243
+      ],
+      "summary": "Runs the innovation-scout and devils-advocate personas to generate and refine candidate idea cards.",
+      "tags": [
+        "persona",
+        "ideation",
+        "llm",
+        "idea"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:stubIdeas",
+      "type": "function",
+      "name": "stubIdeas",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        246,
+        283
+      ],
+      "summary": "Produces deterministic stub idea cards when the LLM is unavailable or ideation degrades.",
+      "tags": [
+        "stub",
+        "fallback",
+        "ideation",
+        "resilience"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "function",
+      "name": "makeDebateCallback",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        287,
+        317
+      ],
+      "summary": "Builds the debate callback that runs debate personas for surviving candidates and coerces their messages.",
+      "tags": [
+        "persona",
+        "debate",
+        "callback",
+        "llm"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "function",
+      "name": "makeScoreCallback",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        319,
+        346
+      ],
+      "summary": "Builds the scoring callback that runs scoring personas and coerces their JSON into Score objects.",
+      "tags": [
+        "persona",
+        "scoring",
+        "callback",
+        "llm"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "function",
+      "name": "makeReviewCallback",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        348,
+        452
+      ],
+      "summary": "Builds the review callback that runs the reviewer panel, injecting human directives and rubric weights, and coerces verdicts.",
+      "tags": [
+        "persona",
+        "review",
+        "callback",
+        "llm"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/main.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "src/main.ts",
+      "lineRange": [
+        15,
+        98
+      ],
+      "summary": "CLI entry that loads env and config, detects the LLM provider, optionally starts the control-room server, runs the Orchestrator, and reports the outcome.",
+      "tags": [
+        "entry-point",
+        "cli",
+        "bootstrap",
+        "run"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/research/ingest.ts:ingestEvent",
+      "type": "function",
+      "name": "ingestEvent",
+      "filePath": "src/research/ingest.ts",
+      "lineRange": [
+        21,
+        84
+      ],
+      "summary": "Ingests all event inputs: fetches websites and rubric/past-winner URLs, caches site content, reads data files, and flags gaps.",
+      "tags": [
+        "ingestion",
+        "research",
+        "web-fetch",
+        "caching"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/research/ingest.ts:fetchWithTimeout",
+      "type": "function",
+      "name": "fetchWithTimeout",
+      "filePath": "src/research/ingest.ts",
+      "lineRange": [
+        86,
+        97
+      ],
+      "summary": "Fetches a URL with a timeout and browser-like user-agent, returning null on failure.",
+      "tags": [
+        "web-fetch",
+        "http",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/research/parsers/csv.ts:profileCSV",
+      "type": "function",
+      "name": "profileCSV",
+      "filePath": "src/research/parsers/csv.ts",
+      "lineRange": [
+        16,
+        27
+      ],
+      "summary": "Parses a CSV file and returns headers plus up to 50 sample rows.",
+      "tags": [
+        "parser",
+        "csv",
+        "data-profile"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/research/parsers/html.ts:normalizeHTML",
+      "type": "function",
+      "name": "normalizeHTML",
+      "filePath": "src/research/parsers/html.ts",
+      "lineRange": [
+        7,
+        27
+      ],
+      "summary": "Normalizes raw HTML into clean readable text by stripping boilerplate tags and decoding entities.",
+      "tags": [
+        "parser",
+        "html",
+        "text-extraction"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "class",
+      "name": "Orchestrator",
+      "filePath": "src/engine/orchestrator.ts",
+      "lineRange": [
+        44,
+        180
+      ],
+      "summary": "Run controller driving the staged pipeline (ingest, research, synthesize, ideate, loop, finalize, artifacts), wiring persona callbacks, budget, event bus, gates, and control-room server.",
+      "tags": [
+        "orchestrator",
+        "engine",
+        "pipeline",
+        "run-controller"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:src/engine/stage-machine.ts:StageMachine",
+      "type": "class",
+      "name": "StageMachine",
+      "filePath": "src/engine/stage-machine.ts",
+      "lineRange": [
+        8,
+        47
+      ],
+      "summary": "Sequential stage state machine emitting stage events on transition, with current/isPast/isDone/remaining queries.",
+      "tags": [
+        "state-machine",
+        "engine",
+        "stage"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "function:src/engine/orchestrator.integration.test.ts:makeConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:tryRun",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:stubIdeas",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/main.ts:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "function:src/research/ingest.ts:ingestEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "function:src/research/ingest.ts:fetchWithTimeout",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/parsers/csv.ts",
+      "target": "function:src/research/parsers/csv.ts:profileCSV",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/parsers/html.ts",
+      "target": "function:src/research/parsers/html.ts:normalizeHTML",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/stage-machine.ts",
+      "target": "class:src/engine/stage-machine.ts:StageMachine",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "function:src/research/ingest.ts:ingestEvent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/parsers/csv.ts",
+      "target": "function:src/research/parsers/csv.ts:profileCSV",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/parsers/html.ts",
+      "target": "function:src/research/parsers/html.ts:normalizeHTML",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/stage-machine.ts",
+      "target": "class:src/engine/stage-machine.ts:StageMachine",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "file:src/engine/orchestrator.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/artifacts/writer.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/budget-governor.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/deliberation-loop.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/persona-tasks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/stage-machine.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/research/ingest.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/agents/runner.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/engine/persona-tasks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/research/ingest.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/agents/runner.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/agents/structured.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/research/ingest.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/stage-machine.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/stage-machine.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/config/env.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/config/schema.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/engine/orchestrator.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "file:src/App.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "file:src/index.css",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "file:src/research/parsers/html.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "function:src/config/env.ts:loadEnv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "function:src/config/schema.ts:loadConfig",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "function:src/agents/llm.ts:detectProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/research/ingest.ts:ingestEvent",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/artifacts/writer.ts:writeArtifacts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "class:src/engine/stage-machine.ts:StageMachine",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "class:src/engine/budget-governor.ts:BudgetGovernor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:runResearch",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:runResearch",
+      "target": "function:src/agents/structured.ts:toFindings",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:ideate",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:ideate",
+      "target": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "target": "function:src/agents/structured.ts:toDebateMessages",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "target": "function:src/agents/structured.ts:toScores",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "target": "function:src/agents/structured.ts:toVerdict",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/research/ingest.ts:ingestEvent",
+      "target": "function:src/research/parsers/html.ts:normalizeHTML",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/stage-machine.ts:StageMachine",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/engine/persona-tasks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/orchestrator.integration.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

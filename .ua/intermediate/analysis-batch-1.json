@@ -1,0 +1,350 @@
+{
+  "nodes": [
+    {
+      "id": "entity:launchpad-ts",
+      "type": "entity",
+      "name": "launchpad-ts",
+      "summary": "Shared vendor template catalog (400+ personas, 160+ skills, spec-kit) that the Hackathon Strategist scaffolds from and references instead of duplicating.",
+      "tags": ["entity", "template", "tooling"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:anthropic-sdk",
+      "type": "entity",
+      "name": "Anthropic SDK (Claude)",
+      "summary": "Anthropic SDK used to run the LLM personas; ANTHROPIC_API_KEY is required for persona runs.",
+      "tags": ["entity", "tool", "llm"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:omniroute",
+      "type": "entity",
+      "name": "OmniRoute",
+      "summary": "OpenAI-compatible LLM gateway (localhost:2016/v1) used as the primary provider in development; resolves model 'auto'.",
+      "tags": ["entity", "tool", "llm", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:litellm",
+      "type": "entity",
+      "name": "LiteLLM",
+      "summary": "OpenAI-compatible LLM gateway (localhost:4000/v1) supported as an alternative provider.",
+      "tags": ["entity", "tool", "llm", "infrastructure"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:typescript",
+      "type": "entity",
+      "name": "TypeScript",
+      "summary": "Strict-mode TypeScript (Node >= 22, pnpm, ESM) is the engine stack; orchestration is plain TS with no agent framework.",
+      "tags": ["entity", "tool", "language"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:pnpm",
+      "type": "entity",
+      "name": "pnpm",
+      "summary": "Exclusive package manager for the repo; global installs (npm -g / pnpm add -g) are strictly prohibited.",
+      "tags": ["entity", "tool"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:react",
+      "type": "entity",
+      "name": "React 19",
+      "summary": "React 19 powers the optional control-room UI, streaming the event bus live.",
+      "tags": ["entity", "tool", "frontend"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:vite",
+      "type": "entity",
+      "name": "Vite 8",
+      "summary": "Vite 8 build tool for the control-room app, kept consistent with the launchpad-ts base.",
+      "tags": ["entity", "tool", "frontend"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:tailwind-css",
+      "type": "entity",
+      "name": "Tailwind CSS v4",
+      "summary": "Tailwind CSS v4 (CSS-first, dark-mode-first with a cyan-400 accent) used for control-room styling.",
+      "tags": ["entity", "tool", "frontend"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:playwright",
+      "type": "entity",
+      "name": "Playwright",
+      "summary": "Browser automation library earmarked as the Phase-5 hardening fallback for JS-rendered event websites that resist cheerio parsing.",
+      "tags": ["entity", "tool", "web-scraping"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:claude-code",
+      "type": "entity",
+      "name": "Claude Code",
+      "summary": "AI coding agent that implemented the bulk of the system and authored the HANDOFF.md entry log.",
+      "tags": ["entity", "agent"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:enterprise-architect",
+      "type": "entity",
+      "name": "Enterprise Architect",
+      "summary": "Architect agent that produced the spec-first scaffold: IMPLEMENTATION_PLAN.md, spec.md, AGENTS.md, RUBRIC.md and the .agents/ persona catalog.",
+      "tags": ["entity", "agent"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:cursor-hackathon-sait",
+      "type": "entity",
+      "name": "Cursor Hackathon SAIT — May 2026",
+      "summary": "The first real-event run of the Strategist (config/events/cursor-hackathon-sait.json), completed headless in Phase 5.",
+      "tags": ["entity", "event"],
+      "complexity": "simple"
+    },
+    {
+      "id": "entity:acme-logistics",
+      "type": "entity",
+      "name": "ACME Logistics",
+      "summary": "Example sponsor in config/events/example.json with a Supply Chain AI challenge track and a $10,000 + incubation prize.",
+      "tags": ["entity", "organization", "example"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:spec:loop-not-one-shot",
+      "type": "claim",
+      "name": "Consensus-gated deliberation loop is the differentiator",
+      "summary": "The differentiator is the iterative, consensus-gated deliberation loop — a decision flow deliberately not a one-shot idea picker. A run that only prints a winner without the loop, the rubric Judge, or a live transcript is not the product.",
+      "tags": ["claim", "architecture"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:spec:evidence-first-decision",
+      "type": "claim",
+      "name": "Evidence-first what-to-build decision",
+      "summary": "The highest-leverage hackathon decision — what to build — is usually made intuitively in the first hour; the Strategist replaces that guess with a research + deliberation problem grounded in cited evidence.",
+      "tags": ["claim", "motivation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:AGENTS:headless-first-parity",
+      "type": "claim",
+      "name": "Headless-first: the CLI run is the product",
+      "summary": "The CLI run is the product; the control room is a view on the same event stream. No UI must produce identical artifacts, so decision logic never lives in the UI.",
+      "tags": ["claim", "architecture", "principles"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:AGENTS:evidence-over-opinion",
+      "type": "claim",
+      "name": "Evidence over opinion",
+      "summary": "Every claim a persona makes carries a citation and a confidence stamp; fabricated sources are a correctness bug, not a style issue.",
+      "tags": ["claim", "principles", "evidence"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:RUBRIC:weighted-model-25-20-20-15-10-10",
+      "type": "claim",
+      "name": "Weighted scoring model (25/20/20/15/10/10)",
+      "summary": "The default weighted decision model scores Problem-Solution Fit 25%, Feasibility 20%, Innovation 20%, Stakeholder Alignment 15%, Data Leverage 10%, and Demo-ability 10%; total = sum(score x weight), with ranks from normalized totals and per-event overrides allowed.",
+      "tags": ["claim", "scoring", "rubric"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:RUBRIC:approve-requires-6plus",
+      "type": "claim",
+      "name": "Judge approves only at >= 6/10 on every criterion",
+      "summary": "The Judge approves a candidate only if every criterion scores >= 6/10 and no gating rule fails; otherwise it returns a Revise verdict with specific, actionable FeedbackItems.",
+      "tags": ["claim", "rubric", "judge"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:RUBRIC:loop-terminates-or-escalates",
+      "type": "claim",
+      "name": "The loop always terminates",
+      "summary": "The deliberation loop must terminate: unanimous approval, or budgets.maxRounds exhausted which escalates to a human with a dissent log — it never forces fake consensus and never refines forever.",
+      "tags": ["claim", "loop", "rubric"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:IMPLEMENTATION_PLAN:runtime-personas-are-files",
+      "type": "claim",
+      "name": "Runtime personas are markdown files",
+      "summary": "Each persona is a markdown file in .agents/personas/ whose frontmatter + body is loaded as the LLM system prompt, so personas are editable without touching code.",
+      "tags": ["claim", "architecture", "personas"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:IMPLEMENTATION_PLAN:plain-ts-no-agent-framework",
+      "type": "claim",
+      "name": "Plain-TypeScript orchestration, no agent framework",
+      "summary": "Orchestration uses no agent framework — plain TypeScript with an event bus, stage machine, and budget governor — so loop control and artifacts stay deterministic and testable.",
+      "tags": ["claim", "architecture", "engineering"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:evidence:confidence-stamps",
+      "type": "claim",
+      "name": "Confidence stamps: high / medium / low",
+      "summary": "Every ResearchFinding and scored statement carries a confidence stamp — high = directly observed or quoted, medium = inferred, low = assumption and must be labeled 'assumption'.",
+      "tags": ["claim", "evidence", "rules"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:HANDOFF:gateway-ccr-compression",
+      "type": "claim",
+      "name": "Gateway CCR compression constraint",
+      "summary": "OmniRoute and LiteLLM compress user messages larger than ~800 chars into [CCR retrieve] stubs, so all persona context must live in the system prompt rather than the user message.",
+      "tags": ["claim", "infrastructure", "llm"],
+      "complexity": "simple"
+    },
+    {
+      "id": "claim:orchestration:stage-machine",
+      "type": "claim",
+      "name": "Single-iteration stage machine with a looping deliberation",
+      "summary": "Stages run in order ingest -> research -> synthesize -> ideate -> [deliberation loop] -> finalize -> artifacts; only the deliberation loop iterates, and a non-converging round escalates immediately.",
+      "tags": ["claim", "orchestration", "loop"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "article:spec",
+      "target": "article:prompt",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "spec.md is the 'what' that implements the architect brief in prompt.md ('Requirements originate in prompt.md')."
+    },
+    {
+      "source": "article:IMPLEMENTATION_PLAN",
+      "target": "article:spec",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "IMPLEMENTATION_PLAN.md is the detailed engineering spec ('how') that implements the 'what' defined in spec.md."
+    },
+    {
+      "source": "article:IMPLEMENTATION_PLAN",
+      "target": "entity:launchpad-ts",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "The base scaffold (package.json, tsconfig, Tailwind/React/Vite conventions) is copied from the launchpad-ts template."
+    },
+    {
+      "source": "article:.agents/personas/reviewer/judge",
+      "target": "article:RUBRIC",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "The Judge owns the event's scoring sheet and applies the RUBRIC.md weights criterion-by-criterion."
+    },
+    {
+      "source": "article:.agents/personas/orchestration/orchestrator",
+      "target": "article:.agents/rules/orchestration",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "The Orchestrator enforces the stage machine, budget governor, gates, and termination rules codified in the orchestration rule."
+    },
+    {
+      "source": "article:.agents/rules/orchestration",
+      "target": "article:.agents/skills/debate-protocol",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "The orchestration rule's round protocol (debate -> refine & score -> reviewer assessment -> loop control) is operationalized by the debate-protocol skill."
+    },
+    {
+      "source": "article:.agents/personas/research/data-analyst",
+      "target": "article:.agents/skills/data-analysis",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "The data-analysis skill is explicitly the procedure for the Data Analyst persona (profiling + leverage map)."
+    },
+    {
+      "source": "article:.agents/personas/research/event-intelligence-analyst",
+      "target": "article:.agents/skills/web-ingest",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "The web-ingest skill normalizes event website content that the Event Intelligence Analyst then extracts facts from."
+    },
+    {
+      "source": "article:.agents/personas/decision/decision-lead",
+      "target": "article:.agents/skills/debate-protocol",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "The Decision Lead executes the refine-and-score step of the debate-protocol round sequence, applying feedback and human directives."
+    },
+    {
+      "source": "article:.agents/personas/creation/devils-advocate",
+      "target": "article:.agents/skills/debate-protocol",
+      "type": "builds_on",
+      "direction": "forward",
+      "weight": 0.8,
+      "description": "The Devil's Advocate performs the critique step defined by the debate-protocol round."
+    },
+    {
+      "source": "article:spec",
+      "target": "entity:enterprise-architect",
+      "type": "authored_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "HANDOFF.md attributes the spec-first scaffold (incl. spec.md) to the enterprise-architect agent."
+    },
+    {
+      "source": "article:IMPLEMENTATION_PLAN",
+      "target": "entity:enterprise-architect",
+      "type": "authored_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "HANDOFF.md attributes IMPLEMENTATION_PLAN.md to the enterprise-architect agent."
+    },
+    {
+      "source": "article:AGENTS",
+      "target": "entity:enterprise-architect",
+      "type": "authored_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "HANDOFF.md attributes AGENTS.md to the enterprise-architect agent."
+    },
+    {
+      "source": "article:RUBRIC",
+      "target": "entity:enterprise-architect",
+      "type": "authored_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "HANDOFF.md attributes RUBRIC.md to the enterprise-architect agent."
+    },
+    {
+      "source": "article:HANDOFF",
+      "target": "entity:claude-code",
+      "type": "authored_by",
+      "direction": "forward",
+      "weight": 0.6,
+      "description": "The HANDOFF.md entry log is written by claude-code sessions (most entries attributed to claude-code)."
+    },
+    {
+      "source": "entity:acme-logistics",
+      "target": "article:.agents/personas/research/sponsor-stakeholder-analyst",
+      "type": "exemplifies",
+      "direction": "forward",
+      "weight": 0.7,
+      "description": "ACME Logistics is the concrete example sponsor (challenge track + prize) the Sponsor & Stakeholder Analyst persona illustrates its stated-vs-inferred citation rule with."
+    },
+    {
+      "source": "entity:cursor-hackathon-sait",
+      "target": "article:spec",
+      "type": "exemplifies",
+      "direction": "forward",
+      "weight": 0.7,
+      "description": "The Cursor Hackathon SAIT May 2026 run is the first real-event instance of spec.md's primary goal: a headless run on a real hackathon."
+    }
+  ]
+}

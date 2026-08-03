@@ -1,0 +1,173 @@
+[
+  {
+    "id": "layer:entry",
+    "name": "Application Entry Points",
+    "description": "CLI and browser bootstrap that load environment/config and start the Strategist orchestrator or the React control-room app",
+    "nodeIds": [
+      "file:src/main.ts",
+      "file:src/main.tsx",
+      "file:src/App.tsx",
+      "file:src/index.css",
+      "file:src/vite-env.d.ts",
+      "file:index.html"
+    ]
+  },
+  {
+    "id": "layer:control-room",
+    "name": "Control Room",
+    "description": "Live operations layer: WebSocket directive broker, HTTP server, and React UI for monitoring the deliberation loop and interjecting mid-run",
+    "nodeIds": [
+      "file:src/control-room/broker.ts",
+      "file:src/control-room/broker.test.ts",
+      "file:src/control-room/server.ts",
+      "file:src/control-room/server.test.ts",
+      "file:src/control-room/ui/components.tsx",
+      "file:src/control-room/ui/meta.ts",
+      "file:src/control-room/ui/useStrategistStream.ts",
+      "file:scripts/control-room-smoke.mts"
+    ]
+  },
+  {
+    "id": "layer:engine",
+    "name": "Orchestration Engine",
+    "description": "Core deliberation orchestration: stage machine, event bus, budget governor, persona task scheduling, and artifact writing that drive a Strategist run",
+    "nodeIds": [
+      "file:src/engine/budget-governor.ts",
+      "file:src/engine/deliberation-loop.ts",
+      "file:src/engine/event-bus.ts",
+      "file:src/engine/orchestrator.ts",
+      "file:src/engine/persona-tasks.ts",
+      "file:src/engine/stage-machine.ts",
+      "file:src/engine/orchestrator.integration.test.ts",
+      "file:src/engine/persona-tasks.test.ts",
+      "file:src/artifacts/writer.ts"
+    ]
+  },
+  {
+    "id": "layer:agents",
+    "name": "Agent Execution",
+    "description": "LLM provider detection, agent runner, structured output parsing, and tool registration that execute the persona prompts",
+    "nodeIds": [
+      "file:src/agents/llm.ts",
+      "file:src/agents/registry.ts",
+      "file:src/agents/runner.ts",
+      "file:src/agents/structured.ts",
+      "file:src/agents/tools.ts",
+      "file:src/agents/structured.test.ts"
+    ]
+  },
+  {
+    "id": "layer:research",
+    "name": "Research Ingestion",
+    "description": "Ingests sponsor, event, and past-winner research data from HTML and CSV sources to feed the deliberation loop",
+    "nodeIds": [
+      "file:src/research/ingest.ts",
+      "file:src/research/parsers/csv.ts",
+      "file:src/research/parsers/html.ts"
+    ]
+  },
+  {
+    "id": "layer:data",
+    "name": "Domain Data & Scoring",
+    "description": "Shared domain types, idea pool, and scoring model consumed across the engine, agents, research, and control room",
+    "nodeIds": [
+      "file:src/data/idea-pool.ts",
+      "file:src/data/scoring.ts",
+      "file:src/data/scoring.test.ts",
+      "file:src/data/types.ts"
+    ]
+  },
+  {
+    "id": "layer:config",
+    "name": "Configuration",
+    "description": "Runtime config schema, env loading, and defaults, plus event definitions, build tooling, and project-level configuration files",
+    "nodeIds": [
+      "file:src/config/defaults.ts",
+      "file:src/config/env.ts",
+      "file:src/config/schema.ts",
+      "file:src/config/types.ts",
+      "config:config/events/cursor-hackathon-sait.json",
+      "config:config/events/example.json",
+      "config:.gitignore",
+      "config:.npmrc",
+      "config:.nvmrc",
+      "config:.oxlintrc.json",
+      "config:.uaignore",
+      "config:package.json",
+      "config:pnpm-workspace.yaml",
+      "config:tsconfig.app.json",
+      "config:tsconfig.json",
+      "config:tsconfig.node.json",
+      "config:vercel.json",
+      "config:vite.config.ts",
+      "file:.env.example",
+      "file:src/test/setup.ts"
+    ]
+  },
+  {
+    "id": "layer:agent-personas",
+    "name": "Agent Personas & Skills",
+    "description": "The multi-agent system definitions: personas, operating rules, and skills that shape how each research, creation, decision, and review agent behaves",
+    "nodeIds": [
+      "config:.agents/registry.json",
+      "document:.agents/README.md",
+      "document:.agents/personas/creation/devils-advocate.md",
+      "document:.agents/personas/creation/innovation-scout.md",
+      "document:.agents/personas/decision/decision-lead.md",
+      "document:.agents/personas/orchestration/orchestrator.md",
+      "document:.agents/personas/research/data-analyst.md",
+      "document:.agents/personas/research/event-intelligence-analyst.md",
+      "document:.agents/personas/research/past-winners-analyst.md",
+      "document:.agents/personas/research/sponsor-stakeholder-analyst.md",
+      "document:.agents/personas/reviewer/audience-reviewer.md",
+      "document:.agents/personas/reviewer/build-feasibility-reviewer.md",
+      "document:.agents/personas/reviewer/judge.md",
+      "document:.agents/personas/reviewer/sponsor-reviewer.md",
+      "document:.agents/rules/engineering.md",
+      "document:.agents/rules/evidence.md",
+      "document:.agents/rules/orchestration.md",
+      "document:.agents/skills/data-analysis.md",
+      "document:.agents/skills/debate-protocol.md",
+      "document:.agents/skills/web-ingest.md"
+    ]
+  },
+  {
+    "id": "layer:documentation",
+    "name": "Documentation",
+    "description": "Project planning and design documents describing the system purpose, specification, rubric, and implementation plan",
+    "nodeIds": [
+      "document:AGENTS.md",
+      "document:HANDOFF.md",
+      "document:IMPLEMENTATION_PLAN.md",
+      "document:prompt.md",
+      "document:README.md",
+      "document:RUBRIC.md",
+      "document:spec.md"
+    ]
+  },
+  {
+    "id": "layer:output",
+    "name": "Generated Artifacts",
+    "description": "Run outputs produced by the Strategist for each event: briefs, evidence dossiers, implementation plans, shortlists, and spec docs",
+    "nodeIds": [
+      "document:output/cursor-hackathon-sait/approval-sheet.md",
+      "document:output/cursor-hackathon-sait/decision-brief.md",
+      "document:output/cursor-hackathon-sait/evidence-dossier.md",
+      "document:output/cursor-hackathon-sait/executive-summary.md",
+      "document:output/cursor-hackathon-sait/implementation-plan.md",
+      "document:output/cursor-hackathon-sait/loop-log.md",
+      "document:output/cursor-hackathon-sait/shortlist.md",
+      "document:output/cursor-hackathon-sait/spec.md",
+      "document:output/example/approval-sheet.md",
+      "document:output/example/decision-brief.md",
+      "document:output/example/evidence-dossier.md",
+      "document:output/example/executive-summary.md",
+      "document:output/example/implementation-plan.md",
+      "document:output/example/loop-log.md",
+      "document:output/example/shortlist.md",
+      "document:output/example/spec.md",
+      "file:output/cursor-hackathon-sait/.cache/site-aHR0cHM6Ly9jdXJzb3JjYWxnYXJ5LmNvbS9jYWxnYXJ5LWhhY2thdGhvbi1z.txt",
+      "file:output/.gitkeep"
+    ]
+  }
+]

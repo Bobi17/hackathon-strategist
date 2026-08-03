@@ -1,0 +1,5424 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-08-02T22:46:31.560Z",
+  "project": {
+    "name": "Hackathon Strategist",
+    "rootDir": ".",
+    "description": "Multi-agent hackathon research & ideation system that tells a team what to build to win"
+  },
+  "layers": [
+    {
+      "id": "layer:entry",
+      "name": "Application Entry Points",
+      "description": "CLI and browser bootstrap that load environment/config and start the Strategist orchestrator or the React control-room app"
+    },
+    {
+      "id": "layer:control-room",
+      "name": "Control Room",
+      "description": "Live operations layer: WebSocket directive broker, HTTP server, and React UI for monitoring the deliberation loop and interjecting mid-run"
+    },
+    {
+      "id": "layer:engine",
+      "name": "Orchestration Engine",
+      "description": "Core deliberation orchestration: stage machine, event bus, budget governor, persona task scheduling, and artifact writing that drive a Strategist run"
+    },
+    {
+      "id": "layer:agents",
+      "name": "Agent Execution",
+      "description": "LLM provider detection, agent runner, structured output parsing, and tool registration that execute the persona prompts"
+    },
+    {
+      "id": "layer:research",
+      "name": "Research Ingestion",
+      "description": "Ingests sponsor, event, and past-winner research data from HTML and CSV sources to feed the deliberation loop"
+    },
+    {
+      "id": "layer:data",
+      "name": "Domain Data & Scoring",
+      "description": "Shared domain types, idea pool, and scoring model consumed across the engine, agents, research, and control room"
+    },
+    {
+      "id": "layer:config",
+      "name": "Configuration",
+      "description": "Runtime config schema, env loading, and defaults, plus event definitions, build tooling, and project-level configuration files"
+    },
+    {
+      "id": "layer:agent-personas",
+      "name": "Agent Personas & Skills",
+      "description": "The multi-agent system definitions: personas, operating rules, and skills that shape how each research, creation, decision, and review agent behaves"
+    },
+    {
+      "id": "layer:documentation",
+      "name": "Documentation",
+      "description": "Project planning and design documents describing the system purpose, specification, rubric, and implementation plan"
+    },
+    {
+      "id": "layer:output",
+      "name": "Generated Artifacts",
+      "description": "Run outputs produced by the Strategist for each event: briefs, evidence dossiers, implementation plans, shortlists, and spec docs"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "file:src/App.tsx",
+      "type": "file",
+      "name": "App.tsx",
+      "filePath": "src/App.tsx",
+      "summary": "Root React component for the control room UI, wiring the live strategist WebSocket stream into the stage rail, transcript, score board, verdict panel, gate controls, and interject form.",
+      "tags": [
+        "component",
+        "react",
+        "ui",
+        "control-room"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/agents/llm.ts",
+      "type": "file",
+      "name": "llm.ts",
+      "filePath": "src/agents/llm.ts",
+      "summary": "LLM client with multi-provider support (Anthropic SDK, OmniRoute, LiteLLM) auto-detected from environment variables, with retry logic and resilient JSON extraction that salvages truncated model output.",
+      "tags": [
+        "llm",
+        "api-client",
+        "provider",
+        "serialization"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/agents/registry.ts",
+      "type": "file",
+      "name": "registry.ts",
+      "filePath": "src/agents/registry.ts",
+      "summary": "Loads persona metadata (YAML frontmatter) from the .agents/personas directory tree and provides lookup by slug for the orchestrator.",
+      "tags": [
+        "registry",
+        "persona",
+        "loader",
+        "metadata"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/agents/runner.ts",
+      "type": "file",
+      "name": "runner.ts",
+      "filePath": "src/agents/runner.ts",
+      "summary": "Persona runner that loads persona markdown files, executes them through the LLM with an optional tool-use loop, and returns raw plus parsed JSON output.",
+      "tags": [
+        "agent-runner",
+        "persona",
+        "llm",
+        "tool-use"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/agents/structured.test.ts",
+      "type": "file",
+      "name": "structured.test.ts",
+      "filePath": "src/agents/structured.test.ts",
+      "summary": "Vitest unit tests for the structured-output coercion helpers (idea cards, findings, verdicts, debate messages, scores) and JSON extraction robustness.",
+      "tags": [
+        "test",
+        "unit-test",
+        "serialization",
+        "json"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/agents/structured.ts",
+      "type": "file",
+      "name": "structured.ts",
+      "filePath": "src/agents/structured.ts",
+      "summary": "Lenient coercion of persona LLM JSON into typed domain objects, defaulting missing fields and rejecting garbage entries so the engine never crashes on malformed output.",
+      "tags": [
+        "serialization",
+        "validation",
+        "type-coercion",
+        "data-model"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/agents/tools.ts",
+      "type": "file",
+      "name": "tools.ts",
+      "filePath": "src/agents/tools.ts",
+      "summary": "Tool registry exposing webFetch, readFile, csvParse, and summarize tools that persona runs can invoke during research.",
+      "tags": [
+        "tool",
+        "registry",
+        "web-scraping",
+        "utility"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/artifacts/writer.ts",
+      "type": "file",
+      "name": "writer.ts",
+      "filePath": "src/artifacts/writer.ts",
+      "summary": "Writes the full set of markdown artifacts (spec, implementation plan, executive summary, shortlist, evidence dossier, loop log, approval sheet, decision brief) after a completed run.",
+      "tags": [
+        "artifact",
+        "markdown",
+        "report-generation",
+        "output"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/config/defaults.ts",
+      "type": "file",
+      "name": "defaults.ts",
+      "filePath": "src/config/defaults.ts",
+      "summary": "Default values for optional event configuration fields (output directory, concurrency, mode, budgets, gates, team).",
+      "tags": [
+        "config",
+        "defaults",
+        "data-model"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/config/env.ts",
+      "type": "file",
+      "name": "env.ts",
+      "filePath": "src/config/env.ts",
+      "summary": "Loads .env.local into process.env once at startup (shell exports win) and provides fail-fast access to required environment variables.",
+      "tags": [
+        "config",
+        "environment",
+        "validation",
+        "bootstrap"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/config/schema.ts",
+      "type": "file",
+      "name": "schema.ts",
+      "filePath": "src/config/schema.ts",
+      "summary": "Validates event configuration JSON field-by-field without external libraries and loads it, throwing with all validation errors when invalid.",
+      "tags": [
+        "config",
+        "validation",
+        "schema",
+        "loader"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/config/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "src/config/types.ts",
+      "summary": "TypeScript type definitions for event configuration: EventConfig, budgets, gates, team, sponsors, and strategy mode.",
+      "tags": [
+        "type-definition",
+        "config",
+        "data-model"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/control-room/broker.test.ts",
+      "type": "file",
+      "name": "broker.test.ts",
+      "filePath": "src/control-room/broker.test.ts",
+      "summary": "Unit tests for DirectiveBroker covering interjection routing, broadcast semantics, round archiving, and lifecycle reset.",
+      "tags": [
+        "test",
+        "unit-test",
+        "control-room",
+        "directive"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/App.tsx:App",
+      "type": "function",
+      "name": "App",
+      "filePath": "src/App.tsx",
+      "lineRange": [
+        18,
+        88
+      ],
+      "summary": "Root control-room component composing stage rail, transcript, score board, verdict panel, gate controls, and interject form around the live strategist stream.",
+      "tags": [
+        "component",
+        "react",
+        "ui",
+        "control-room"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/llm.ts:detectProvider",
+      "type": "function",
+      "name": "detectProvider",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        68,
+        76
+      ],
+      "summary": "Detects the configured LLM provider from environment variables with priority OmniRoute > LiteLLM > Anthropic, throwing if none is set.",
+      "tags": [
+        "provider",
+        "detection",
+        "llm",
+        "config"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/llm.ts:callAnthropic",
+      "type": "function",
+      "name": "callAnthropic",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        91,
+        116
+      ],
+      "summary": "Calls the Anthropic SDK with retry and token accounting for a single system/user message pair.",
+      "tags": [
+        "llm",
+        "anthropic",
+        "api-client"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/llm.ts:callOpenAICompatible",
+      "type": "function",
+      "name": "callOpenAICompatible",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        120,
+        168
+      ],
+      "summary": "Calls an OpenAI-compatible gateway (OmniRoute/LiteLLM) chat-completions endpoint with retry and token accounting.",
+      "tags": [
+        "llm",
+        "openai-compatible",
+        "gateway",
+        "api-client"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/llm.ts:callLLM",
+      "type": "function",
+      "name": "callLLM",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        179,
+        214
+      ],
+      "summary": "Main LLM entry point dispatching to the detected provider with retry and temperature/max-token options.",
+      "tags": [
+        "llm",
+        "dispatch",
+        "api-client"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/llm.ts:extractJSON",
+      "type": "function",
+      "name": "extractJSON",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        225,
+        278
+      ],
+      "summary": "Extracts JSON from persona text, stripping fences and prose, and repairs truncated or unescaped payloads.",
+      "tags": [
+        "json",
+        "parsing",
+        "recovery",
+        "serialization"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/llm.ts:salvageTruncatedJSON",
+      "type": "function",
+      "name": "salvageTruncatedJSON",
+      "filePath": "src/agents/llm.ts",
+      "lineRange": [
+        287,
+        341
+      ],
+      "summary": "Attempts to repair truncated or unescaped JSON by balancing braces and closing open strings.",
+      "tags": [
+        "json",
+        "recovery",
+        "parsing",
+        "robustness"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/registry.ts:loadAllPersonas",
+      "type": "function",
+      "name": "loadAllPersonas",
+      "filePath": "src/agents/registry.ts",
+      "lineRange": [
+        22,
+        56
+      ],
+      "summary": "Loads persona frontmatter metadata from every category directory under .agents/personas/.",
+      "tags": [
+        "persona",
+        "registry",
+        "loader",
+        "metadata"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/registry.ts:findPersona",
+      "type": "function",
+      "name": "findPersona",
+      "filePath": "src/agents/registry.ts",
+      "lineRange": [
+        61,
+        64
+      ],
+      "summary": "Looks up a persona by slug across all categories.",
+      "tags": [
+        "persona",
+        "lookup",
+        "registry"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/runner.ts:loadPersona",
+      "type": "function",
+      "name": "loadPersona",
+      "filePath": "src/agents/runner.ts",
+      "lineRange": [
+        32,
+        55
+      ],
+      "summary": "Reads a persona markdown file and parses its YAML frontmatter into a PersonaFile.",
+      "tags": [
+        "persona",
+        "loader",
+        "frontmatter"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/runner.ts:runPersona",
+      "type": "function",
+      "name": "runPersona",
+      "filePath": "src/agents/runner.ts",
+      "lineRange": [
+        73,
+        143
+      ],
+      "summary": "Runs a persona through the LLM with an optional tool-use loop, parsing JSON output and returning the raw plus parsed result.",
+      "tags": [
+        "persona",
+        "llm",
+        "tool-use",
+        "runner"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/runner.ts:runPersonaById",
+      "type": "function",
+      "name": "runPersonaById",
+      "filePath": "src/agents/runner.ts",
+      "lineRange": [
+        148,
+        159
+      ],
+      "summary": "Convenience wrapper that maps a persona ID to its file and runs it, stamping the persona on the result.",
+      "tags": [
+        "persona",
+        "dispatch",
+        "runner"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "function",
+      "name": "toIdeaCards",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        42,
+        68
+      ],
+      "summary": "Coerces raw LLM JSON into IdeaCard objects, handling arrays, {ideas:[]} wrappers, aliases, and auto-ids.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "idea",
+        "parsing"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toFindings",
+      "type": "function",
+      "name": "toFindings",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        74,
+        100
+      ],
+      "summary": "Coerces research findings JSON into typed ResearchFinding objects with evidence confidence defaults.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "research",
+        "parsing"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toVerdict",
+      "type": "function",
+      "name": "toVerdict",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        106,
+        133
+      ],
+      "summary": "Coerces reviewer JSON into ReviewerVerdict objects, normalizing verdict values and feedback items.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "review",
+        "parsing"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toDebateMessages",
+      "type": "function",
+      "name": "toDebateMessages",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        139,
+        164
+      ],
+      "summary": "Coerces debate JSON into DebateMessage objects with persona fallbacks.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "debate",
+        "parsing"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/structured.ts:extractCriteria",
+      "type": "function",
+      "name": "extractCriteria",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        176,
+        188
+      ],
+      "summary": "Extracts and validates a score-criteria map from a raw record, returning null for non-genuine score objects.",
+      "tags": [
+        "serialization",
+        "validation",
+        "scoring"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/structured.ts:toScores",
+      "type": "function",
+      "name": "toScores",
+      "filePath": "src/agents/structured.ts",
+      "lineRange": [
+        199,
+        237
+      ],
+      "summary": "Coerces score JSON (array or map form) into typed Score objects, rejecting garbage entries and filtering to known idea IDs.",
+      "tags": [
+        "serialization",
+        "coercion",
+        "scoring",
+        "validation"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/tools.ts:stripBoilerplate",
+      "type": "function",
+      "name": "stripBoilerplate",
+      "filePath": "src/agents/tools.ts",
+      "lineRange": [
+        43,
+        54
+      ],
+      "summary": "Removes script/style/nav/footer/header blocks and HTML tags, collapsing whitespace for webFetch output.",
+      "tags": [
+        "html",
+        "cleaning",
+        "utility"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/agents/tools.ts:execTool",
+      "type": "function",
+      "name": "execTool",
+      "filePath": "src/agents/tools.ts",
+      "lineRange": [
+        126,
+        133
+      ],
+      "summary": "Dispatches a tool call by name to the tool registry, returning a ToolResult.",
+      "tags": [
+        "tool",
+        "dispatch",
+        "registry"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:writeArtifacts",
+      "type": "function",
+      "name": "writeArtifacts",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        26,
+        52
+      ],
+      "summary": "Writes the full eight-file markdown artifact set for a completed run to output/<slug>/.",
+      "tags": [
+        "artifact",
+        "writer",
+        "markdown",
+        "output"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderSpec",
+      "type": "function",
+      "name": "renderSpec",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        56,
+        108
+      ],
+      "summary": "Renders the winning solution spec markdown from the event config and winner.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "spec"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderImplementationPlan",
+      "type": "function",
+      "name": "renderImplementationPlan",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        110,
+        136
+      ],
+      "summary": "Renders the implementation-plan markdown from the run outcome.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "plan"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderShortlist",
+      "type": "function",
+      "name": "renderShortlist",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        149,
+        165
+      ],
+      "summary": "Renders the Top-3 shortlist table with per-criterion scores.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "shortlist",
+        "scoring"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderLoopLog",
+      "type": "function",
+      "name": "renderLoopLog",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        167,
+        188
+      ],
+      "summary": "Renders a chronological log of deliberation rounds for the loop-log artifact.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "loop-log"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderApprovalSheet",
+      "type": "function",
+      "name": "renderApprovalSheet",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        190,
+        209
+      ],
+      "summary": "Renders the reviewer approval sheet listing per-reviewer verdicts.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "approval"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/artifacts/writer.ts:renderDecisionBrief",
+      "type": "function",
+      "name": "renderDecisionBrief",
+      "filePath": "src/artifacts/writer.ts",
+      "lineRange": [
+        211,
+        247
+      ],
+      "summary": "Renders the decision brief summarizing the winner, dissent, and weight sensitivity.",
+      "tags": [
+        "markdown",
+        "renderer",
+        "decision",
+        "sensitivity"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/config/env.ts:loadEnv",
+      "type": "function",
+      "name": "loadEnv",
+      "filePath": "src/config/env.ts",
+      "lineRange": [
+        19,
+        29
+      ],
+      "summary": "Idempotently loads .env.local into process.env without overwriting existing values.",
+      "tags": [
+        "env",
+        "config",
+        "bootstrap"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/config/env.ts:requireEnv",
+      "type": "function",
+      "name": "requireEnv",
+      "filePath": "src/config/env.ts",
+      "lineRange": [
+        36,
+        44
+      ],
+      "summary": "Returns a required environment variable or throws with a pointer to .env.local.",
+      "tags": [
+        "env",
+        "validation",
+        "config"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/config/schema.ts:validateConfig",
+      "type": "function",
+      "name": "validateConfig",
+      "filePath": "src/config/schema.ts",
+      "lineRange": [
+        12,
+        71
+      ],
+      "summary": "Validates an EventConfig object field-by-field, returning a list of errors (empty when valid).",
+      "tags": [
+        "config",
+        "validation",
+        "schema"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/config/schema.ts:loadConfig",
+      "type": "function",
+      "name": "loadConfig",
+      "filePath": "src/config/schema.ts",
+      "lineRange": [
+        77,
+        85
+      ],
+      "summary": "Loads and validates an event config JSON file, throwing with all validation errors if invalid.",
+      "tags": [
+        "config",
+        "loader",
+        "validation"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/control-room/broker.ts",
+      "type": "file",
+      "name": "broker.ts",
+      "filePath": "src/control-room/broker.ts",
+      "summary": "DirectiveBroker routes human interjections from the control room to the targeted reviewer persona(s), tracking pending, shown, and consumed directives per deliberation round.",
+      "tags": [
+        "service",
+        "control-room",
+        "message-routing",
+        "human-directive"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/control-room/server.test.ts",
+      "type": "file",
+      "name": "server.test.ts",
+      "filePath": "src/control-room/server.test.ts",
+      "summary": "Integration tests for ControlRoomServer: WebSocket replay/streaming, interjections, gate approval/rejection/escalation, auto-resolve, and static UI serving.",
+      "tags": [
+        "test",
+        "integration-test",
+        "websocket",
+        "control-room"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/control-room/server.ts",
+      "type": "file",
+      "name": "server.ts",
+      "filePath": "src/control-room/server.ts",
+      "summary": "HTTP + WebSocket server that serves the built control-room UI, streams live event-bus events to clients, accepts interjections, and resolves human gates with timeout escalation.",
+      "tags": [
+        "server",
+        "websocket",
+        "http",
+        "event-streaming",
+        "control-room"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/control-room/ui/components.tsx",
+      "type": "file",
+      "name": "components.tsx",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "React components for the control room: stage rail, transcript feed, score board, verdict panel, gate controls, interject form, and status header.",
+      "tags": [
+        "component",
+        "react",
+        "ui",
+        "dashboard"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/control-room/ui/meta.ts",
+      "type": "file",
+      "name": "meta.ts",
+      "filePath": "src/control-room/ui/meta.ts",
+      "summary": "Persona display metadata (emoji, label, chip style) kept out of components so fast-refresh only re-renders the component file.",
+      "tags": [
+        "metadata",
+        "ui",
+        "persona",
+        "constants"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "file",
+      "name": "useStrategistStream.ts",
+      "filePath": "src/control-room/ui/useStrategistStream.ts",
+      "summary": "React hook bridging the control room to the strategist: connects a WebSocket, accumulates the full event stream, and exposes derived feed/rounds/gates state plus interject and resolveGate actions.",
+      "tags": [
+        "hook",
+        "react",
+        "websocket",
+        "state-management",
+        "event-stream"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/data/idea-pool.ts",
+      "type": "file",
+      "name": "idea-pool.ts",
+      "filePath": "src/data/idea-pool.ts",
+      "summary": "IdeaPool provides Map-backed storage for candidate idea cards with add, get, remove, replace-all, and snapshot operations.",
+      "tags": [
+        "data-model",
+        "collection",
+        "storage",
+        "idea"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/data/scoring.test.ts",
+      "type": "file",
+      "name": "scoring.test.ts",
+      "filePath": "src/data/scoring.test.ts",
+      "summary": "Unit tests for the weighted scoring engine: total computation, ranking, weight merging, progress detection, and sensitivity analysis.",
+      "tags": [
+        "test",
+        "unit-test",
+        "scoring",
+        "sensitivity-analysis"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/data/scoring.ts",
+      "type": "file",
+      "name": "scoring.ts",
+      "filePath": "src/data/scoring.ts",
+      "summary": "Weighted scoring engine that computes idea totals, ranks candidates with tie-breaking, detects round convergence, and runs sensitivity analysis to find load-bearing criteria.",
+      "tags": [
+        "scoring",
+        "ranking",
+        "algorithm",
+        "data-model"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/data/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "src/data/types.ts",
+      "summary": "Core domain types: personas, stages, idea cards, scores, verdicts, human directives, deliberation rounds, loop outcomes, and event-bus events, plus DEFAULT_WEIGHTS.",
+      "tags": [
+        "type-definition",
+        "data-model",
+        "domain",
+        "event"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/engine/budget-governor.ts",
+      "type": "file",
+      "name": "budget-governor.ts",
+      "filePath": "src/engine/budget-governor.ts",
+      "summary": "BudgetGovernor enforces research time budgets and round caps, tracking elapsed research time, per-round timing, and remaining rounds.",
+      "tags": [
+        "budget",
+        "governor",
+        "engine",
+        "time-tracking"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/engine/deliberation-loop.ts",
+      "type": "file",
+      "name": "deliberation-loop.ts",
+      "filePath": "src/engine/deliberation-loop.ts",
+      "summary": "Owns the iterative debate -> score -> review -> approve loop until reviewer approval or budget exhaustion, then computes the Top 3 and winner with dissent logging.",
+      "tags": [
+        "engine",
+        "deliberation",
+        "loop",
+        "orchestration",
+        "scoring"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/engine/event-bus.ts",
+      "type": "file",
+      "name": "event-bus.ts",
+      "filePath": "src/engine/event-bus.ts",
+      "summary": "EventBus is the single source of truth for run events (emit, subscribe, replay, filter) and the globalBus singleton powers the transcript, loop log, and control-room WS stream.",
+      "tags": [
+        "event-bus",
+        "pub-sub",
+        "singleton",
+        "event-streaming"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/server.ts:createControlRoom",
+      "type": "function",
+      "name": "createControlRoom",
+      "filePath": "src/control-room/server.ts",
+      "lineRange": [
+        239,
+        242
+      ],
+      "summary": "Factory helper that creates a ControlRoomServer (convenience wrapper).",
+      "tags": [
+        "factory",
+        "server",
+        "control-room"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "function",
+      "name": "personaMeta",
+      "filePath": "src/control-room/ui/meta.ts",
+      "lineRange": [
+        21,
+        23
+      ],
+      "summary": "Returns display metadata (emoji, label, chip style) for a persona ID with a fallback entry.",
+      "tags": [
+        "metadata",
+        "ui",
+        "persona",
+        "lookup"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:StageRail",
+      "type": "function",
+      "name": "StageRail",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        20,
+        43
+      ],
+      "summary": "Renders the horizontal stage progress rail across all run stages.",
+      "tags": [
+        "component",
+        "react",
+        "stage",
+        "ui"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:GateBadge",
+      "type": "function",
+      "name": "GateBadge",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        56,
+        67
+      ],
+      "summary": "Renders a small badge for a gate decision.",
+      "tags": [
+        "component",
+        "react",
+        "gate",
+        "ui"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:Transcript",
+      "type": "function",
+      "name": "Transcript",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        69,
+        138
+      ],
+      "summary": "Renders the live transcript feed with persona messages, citations, and stage/round markers.",
+      "tags": [
+        "component",
+        "react",
+        "transcript",
+        "ui"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "type": "function",
+      "name": "ScoreBoard",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        142,
+        173
+      ],
+      "summary": "Renders per-criterion scores for the selected deliberation round.",
+      "tags": [
+        "component",
+        "react",
+        "scoring",
+        "ui"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "type": "function",
+      "name": "VerdictPanel",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        177,
+        207
+      ],
+      "summary": "Renders reviewer verdicts with feedback for the selected round.",
+      "tags": [
+        "component",
+        "react",
+        "verdict",
+        "ui"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:GateControls",
+      "type": "function",
+      "name": "GateControls",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        211,
+        243
+      ],
+      "summary": "Renders approve/reject controls for the currently active gate.",
+      "tags": [
+        "component",
+        "react",
+        "gate",
+        "ui"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:Interject",
+      "type": "function",
+      "name": "Interject",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        249,
+        296
+      ],
+      "summary": "Renders the interjection form for sending human directives to reviewer personas.",
+      "tags": [
+        "component",
+        "react",
+        "interject",
+        "ui"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:StatusHeader",
+      "type": "function",
+      "name": "StatusHeader",
+      "filePath": "src/control-room/ui/components.tsx",
+      "lineRange": [
+        300,
+        320
+      ],
+      "summary": "Renders connection status, run status, and event count in the control-room header.",
+      "tags": [
+        "component",
+        "react",
+        "status",
+        "ui"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/useStrategistStream.ts:toFeedItem",
+      "type": "function",
+      "name": "toFeedItem",
+      "filePath": "src/control-room/ui/useStrategistStream.ts",
+      "lineRange": [
+        52,
+        65
+      ],
+      "summary": "Maps a raw StreamEvent onto a UI FeedItem, dropping unknown event kinds.",
+      "tags": [
+        "serialization",
+        "event",
+        "mapping",
+        "ui"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "function",
+      "name": "useStrategistStream",
+      "filePath": "src/control-room/ui/useStrategistStream.ts",
+      "lineRange": [
+        67,
+        212
+      ],
+      "summary": "React hook bridging the control room to the strategist WS stream: accumulates events, derives feed/rounds/gates state, and exposes interject/resolveGate actions.",
+      "tags": [
+        "hook",
+        "react",
+        "websocket",
+        "state-management"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/data/scoring.ts:scoreIdea",
+      "type": "function",
+      "name": "scoreIdea",
+      "filePath": "src/data/scoring.ts",
+      "lineRange": [
+        20,
+        30
+      ],
+      "summary": "Computes a weighted total score for a single idea card from criterion scores and weights.",
+      "tags": [
+        "scoring",
+        "algorithm",
+        "weighted"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/data/scoring.ts:rank",
+      "type": "function",
+      "name": "rank",
+      "filePath": "src/data/scoring.ts",
+      "lineRange": [
+        36,
+        41
+      ],
+      "summary": "Sorts scores by total descending (tie-broken by ideaId) and stamps rank positions.",
+      "tags": [
+        "scoring",
+        "ranking",
+        "algorithm"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/data/scoring.ts:sensitivityAnalysis",
+      "type": "function",
+      "name": "sensitivityAnalysis",
+      "filePath": "src/data/scoring.ts",
+      "lineRange": [
+        49,
+        86
+      ],
+      "summary": "For each criterion, drops its weight to zero and re-ranks to measure how far the winner falls, identifying load-bearing criteria.",
+      "tags": [
+        "scoring",
+        "sensitivity-analysis",
+        "algorithm"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/data/scoring.ts:roundMadeProgress",
+      "type": "function",
+      "name": "roundMadeProgress",
+      "filePath": "src/data/scoring.ts",
+      "lineRange": [
+        92,
+        105
+      ],
+      "summary": "Detects whether a deliberation round made progress versus the prior one by checking revisions or score movement.",
+      "tags": [
+        "scoring",
+        "convergence",
+        "algorithm"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "function",
+      "name": "runDeliberationLoop",
+      "filePath": "src/engine/deliberation-loop.ts",
+      "lineRange": [
+        23,
+        139
+      ],
+      "summary": "Owns the iterative debate -> score -> review -> approve loop, enforcing budget and non-convergence exits, then computes Top 3 and winner.",
+      "tags": [
+        "engine",
+        "deliberation",
+        "loop",
+        "orchestration"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "class",
+      "name": "DirectiveBroker",
+      "filePath": "src/control-room/broker.ts",
+      "lineRange": [
+        17,
+        91
+      ],
+      "summary": "Routes human interjections to reviewer personas: registers directives, hands them out per round, archives shown sets, and drains consumed ones.",
+      "tags": [
+        "service",
+        "control-room",
+        "message-routing",
+        "human-directive"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "class",
+      "name": "ControlRoomServer",
+      "filePath": "src/control-room/server.ts",
+      "lineRange": [
+        47,
+        231
+      ],
+      "summary": "HTTP + WebSocket server serving the built control-room UI, streaming event-bus events, accepting interjections, and resolving human gates with timeout escalation.",
+      "tags": [
+        "server",
+        "websocket",
+        "control-room",
+        "event-streaming"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "class:src/data/idea-pool.ts:IdeaPool",
+      "type": "class",
+      "name": "IdeaPool",
+      "filePath": "src/data/idea-pool.ts",
+      "lineRange": [
+        5,
+        38
+      ],
+      "summary": "Map-backed store for candidate idea cards with add/get/remove/replace/snapshot operations.",
+      "tags": [
+        "data-model",
+        "collection",
+        "idea",
+        "storage"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "class:src/engine/budget-governor.ts:BudgetGovernor",
+      "type": "class",
+      "name": "BudgetGovernor",
+      "filePath": "src/engine/budget-governor.ts",
+      "lineRange": [
+        11,
+        61
+      ],
+      "summary": "Enforces research time budgets and round caps, tracking elapsed time and remaining rounds.",
+      "tags": [
+        "budget",
+        "governor",
+        "engine",
+        "time-tracking"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "class:src/engine/event-bus.ts:EventBus",
+      "type": "class",
+      "name": "EventBus",
+      "filePath": "src/engine/event-bus.ts",
+      "lineRange": [
+        9,
+        50
+      ],
+      "summary": "In-memory pub/sub event bus assigning sequence numbers, with subscribe/replay/filter, backing the run transcript and WS stream.",
+      "tags": [
+        "event-bus",
+        "pub-sub",
+        "event-streaming"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/engine/orchestrator.integration.test.ts",
+      "type": "file",
+      "name": "orchestrator.integration.test.ts",
+      "filePath": "src/engine/orchestrator.integration.test.ts",
+      "summary": "End-to-end Orchestrator test running the full pipeline on deterministic stubs with no LLM provider, verifying all eight markdown artifacts are produced with real structure.",
+      "tags": [
+        "test",
+        "integration-test",
+        "orchestrator",
+        "pipeline"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/engine/orchestrator.ts",
+      "type": "file",
+      "name": "orchestrator.ts",
+      "filePath": "src/engine/orchestrator.ts",
+      "summary": "Orchestrator is the run controller: drives the staged pipeline (ingest, research, synthesize, ideate, loop, finalize, artifacts), wires persona callbacks, budget, event bus, gates, and the control-room server.",
+      "tags": [
+        "entry-point",
+        "orchestrator",
+        "engine",
+        "pipeline",
+        "run-controller"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/engine/persona-tasks.test.ts",
+      "type": "file",
+      "name": "persona-tasks.test.ts",
+      "filePath": "src/engine/persona-tasks.test.ts",
+      "summary": "Tests the persona-tasks empty-output retry behavior, mocking the runner to assert retry-then-degrade semantics for research personas.",
+      "tags": [
+        "test",
+        "unit-test",
+        "persona",
+        "retry",
+        "resilience"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/engine/persona-tasks.ts",
+      "type": "file",
+      "name": "persona-tasks.ts",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "LLM-wired persona tasks: research, synthesis, ideation, debate, scoring, and review callbacks that run personas and coerce JSON, degrading to deterministic stubs on failure.",
+      "tags": [
+        "persona",
+        "llm",
+        "orchestration",
+        "callback",
+        "resilience"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/engine/stage-machine.ts",
+      "type": "file",
+      "name": "stage-machine.ts",
+      "filePath": "src/engine/stage-machine.ts",
+      "summary": "StageMachine drives the run through ordered stages, emitting a stage event on the bus at each transition with current/isPast/isDone queries.",
+      "tags": [
+        "state-machine",
+        "engine",
+        "stage",
+        "event-bus"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/main.ts",
+      "type": "file",
+      "name": "main.ts",
+      "filePath": "src/main.ts",
+      "summary": "CLI entry point that loads environment and config, detects the LLM provider, optionally launches the control-room server, runs the Orchestrator, and reports the outcome.",
+      "tags": [
+        "entry-point",
+        "cli",
+        "bootstrap",
+        "run"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/main.tsx",
+      "type": "file",
+      "name": "main.tsx",
+      "filePath": "src/main.tsx",
+      "summary": "React entry point that mounts the control-room App into the DOM under StrictMode.",
+      "tags": [
+        "entry-point",
+        "react",
+        "bootstrap",
+        "ui"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/research/ingest.ts",
+      "type": "file",
+      "name": "ingest.ts",
+      "filePath": "src/research/ingest.ts",
+      "summary": "Ingestion pipeline that fetches event websites and rubric/past-winner URLs, normalizes HTML, reads local data files, caches site content, and flags missing inputs.",
+      "tags": [
+        "ingestion",
+        "research",
+        "web-fetch",
+        "caching",
+        "pipeline"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/research/parsers/csv.ts",
+      "type": "file",
+      "name": "csv.ts",
+      "filePath": "src/research/parsers/csv.ts",
+      "summary": "CSV profiler that parses a dataset file with csv-parse and returns headers plus up to 50 sample rows.",
+      "tags": [
+        "parser",
+        "csv",
+        "data",
+        "utility"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/research/parsers/html.ts",
+      "type": "file",
+      "name": "html.ts",
+      "filePath": "src/research/parsers/html.ts",
+      "summary": "HTML normalizer that strips script/style/nav/footer/header blocks, removes tags, decodes entities, and collapses whitespace into clean readable text.",
+      "tags": [
+        "parser",
+        "html",
+        "text-extraction",
+        "utility"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/test/setup.ts",
+      "type": "file",
+      "name": "setup.ts",
+      "filePath": "src/test/setup.ts",
+      "summary": "Vitest setup file providing a baseline (currently empty) test bootstrap.",
+      "tags": [
+        "test",
+        "setup",
+        "config"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "file:src/vite-env.d.ts",
+      "type": "file",
+      "name": "vite-env.d.ts",
+      "filePath": "src/vite-env.d.ts",
+      "summary": "Vite client type reference declaration for the project.",
+      "tags": [
+        "type-definition",
+        "vite",
+        "environment"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/orchestrator.integration.test.ts:makeConfig",
+      "type": "function",
+      "name": "makeConfig",
+      "filePath": "src/engine/orchestrator.integration.test.ts",
+      "lineRange": [
+        26,
+        41
+      ],
+      "summary": "Builds an EventConfig fixture for the orchestrator integration test run.",
+      "tags": [
+        "test",
+        "fixture",
+        "config"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:tryRun",
+      "type": "function",
+      "name": "tryRun",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        37,
+        69
+      ],
+      "summary": "Runs a persona via the runner with one retry on empty output, degrading to null on failure.",
+      "tags": [
+        "persona",
+        "llm",
+        "retry",
+        "resilience"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "function",
+      "name": "runResearch",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        136,
+        170
+      ],
+      "summary": "Runs the four research personas in parallel and coalesces findings into a ResearchResult with evidence text and degraded flags.",
+      "tags": [
+        "persona",
+        "research",
+        "parallel",
+        "llm"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "function",
+      "name": "synthesizeFindings",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        181,
+        195
+      ],
+      "summary": "Runs the decision-lead persona to synthesize research findings into a strategy summary.",
+      "tags": [
+        "persona",
+        "synthesis",
+        "llm"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "function",
+      "name": "ideate",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        199,
+        243
+      ],
+      "summary": "Runs the innovation-scout and devils-advocate personas to generate and refine candidate idea cards.",
+      "tags": [
+        "persona",
+        "ideation",
+        "llm",
+        "idea"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:stubIdeas",
+      "type": "function",
+      "name": "stubIdeas",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        246,
+        283
+      ],
+      "summary": "Produces deterministic stub idea cards when the LLM is unavailable or ideation degrades.",
+      "tags": [
+        "stub",
+        "fallback",
+        "ideation",
+        "resilience"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "function",
+      "name": "makeDebateCallback",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        287,
+        317
+      ],
+      "summary": "Builds the debate callback that runs debate personas for surviving candidates and coerces their messages.",
+      "tags": [
+        "persona",
+        "debate",
+        "callback",
+        "llm"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "function",
+      "name": "makeScoreCallback",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        319,
+        346
+      ],
+      "summary": "Builds the scoring callback that runs scoring personas and coerces their JSON into Score objects.",
+      "tags": [
+        "persona",
+        "scoring",
+        "callback",
+        "llm"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "function",
+      "name": "makeReviewCallback",
+      "filePath": "src/engine/persona-tasks.ts",
+      "lineRange": [
+        348,
+        452
+      ],
+      "summary": "Builds the review callback that runs the reviewer panel, injecting human directives and rubric weights, and coerces verdicts.",
+      "tags": [
+        "persona",
+        "review",
+        "callback",
+        "llm"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/main.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "src/main.ts",
+      "lineRange": [
+        15,
+        98
+      ],
+      "summary": "CLI entry that loads env and config, detects the LLM provider, optionally starts the control-room server, runs the Orchestrator, and reports the outcome.",
+      "tags": [
+        "entry-point",
+        "cli",
+        "bootstrap",
+        "run"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/research/ingest.ts:ingestEvent",
+      "type": "function",
+      "name": "ingestEvent",
+      "filePath": "src/research/ingest.ts",
+      "lineRange": [
+        21,
+        84
+      ],
+      "summary": "Ingests all event inputs: fetches websites and rubric/past-winner URLs, caches site content, reads data files, and flags gaps.",
+      "tags": [
+        "ingestion",
+        "research",
+        "web-fetch",
+        "caching"
+      ],
+      "complexity": "moderate",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/research/ingest.ts:fetchWithTimeout",
+      "type": "function",
+      "name": "fetchWithTimeout",
+      "filePath": "src/research/ingest.ts",
+      "lineRange": [
+        86,
+        97
+      ],
+      "summary": "Fetches a URL with a timeout and browser-like user-agent, returning null on failure.",
+      "tags": [
+        "web-fetch",
+        "http",
+        "utility"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/research/parsers/csv.ts:profileCSV",
+      "type": "function",
+      "name": "profileCSV",
+      "filePath": "src/research/parsers/csv.ts",
+      "lineRange": [
+        16,
+        27
+      ],
+      "summary": "Parses a CSV file and returns headers plus up to 50 sample rows.",
+      "tags": [
+        "parser",
+        "csv",
+        "data-profile"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "function:src/research/parsers/html.ts:normalizeHTML",
+      "type": "function",
+      "name": "normalizeHTML",
+      "filePath": "src/research/parsers/html.ts",
+      "lineRange": [
+        7,
+        27
+      ],
+      "summary": "Normalizes raw HTML into clean readable text by stripping boilerplate tags and decoding entities.",
+      "tags": [
+        "parser",
+        "html",
+        "text-extraction"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "class",
+      "name": "Orchestrator",
+      "filePath": "src/engine/orchestrator.ts",
+      "lineRange": [
+        44,
+        180
+      ],
+      "summary": "Run controller driving the staged pipeline (ingest, research, synthesize, ideate, loop, finalize, artifacts), wiring persona callbacks, budget, event bus, gates, and control-room server.",
+      "tags": [
+        "orchestrator",
+        "engine",
+        "pipeline",
+        "run-controller"
+      ],
+      "complexity": "complex",
+      "layer": "layer:config"
+    },
+    {
+      "id": "class:src/engine/stage-machine.ts:StageMachine",
+      "type": "class",
+      "name": "StageMachine",
+      "filePath": "src/engine/stage-machine.ts",
+      "lineRange": [
+        8,
+        47
+      ],
+      "summary": "Sequential stage state machine emitting stage events on transition, with current/isPast/isDone/remaining queries.",
+      "tags": [
+        "state-machine",
+        "engine",
+        "stage"
+      ],
+      "complexity": "simple",
+      "layer": "layer:config"
+    },
+    {
+      "id": "layer:entry",
+      "type": "module",
+      "title": "Application Entry Points",
+      "summary": "CLI and browser bootstrap that load environment/config and start the Strategist orchestrator or the React control-room app",
+      "layer": "layer:entry",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Application Entry Points",
+      "complexity": "moderate"
+    },
+    {
+      "id": "layer:control-room",
+      "type": "module",
+      "title": "Control Room",
+      "summary": "Live operations layer: WebSocket directive broker, HTTP server, and React UI for monitoring the deliberation loop and interjecting mid-run",
+      "layer": "layer:control-room",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Control Room",
+      "complexity": "moderate"
+    },
+    {
+      "id": "layer:engine",
+      "type": "module",
+      "title": "Orchestration Engine",
+      "summary": "Core deliberation orchestration: stage machine, event bus, budget governor, persona task scheduling, and artifact writing that drive a Strategist run",
+      "layer": "layer:engine",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Orchestration Engine",
+      "complexity": "moderate"
+    },
+    {
+      "id": "layer:agents",
+      "type": "module",
+      "title": "Agent Execution",
+      "summary": "LLM provider detection, agent runner, structured output parsing, and tool registration that execute the persona prompts",
+      "layer": "layer:agents",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Agent Execution",
+      "complexity": "moderate"
+    },
+    {
+      "id": "layer:research",
+      "type": "module",
+      "title": "Research Ingestion",
+      "summary": "Ingests sponsor, event, and past-winner research data from HTML and CSV sources to feed the deliberation loop",
+      "layer": "layer:research",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Research Ingestion",
+      "complexity": "moderate"
+    },
+    {
+      "id": "layer:data",
+      "type": "module",
+      "title": "Domain Data & Scoring",
+      "summary": "Shared domain types, idea pool, and scoring model consumed across the engine, agents, research, and control room",
+      "layer": "layer:data",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Domain Data & Scoring",
+      "complexity": "moderate"
+    },
+    {
+      "id": "layer:config",
+      "type": "module",
+      "title": "Configuration",
+      "summary": "Runtime config schema, env loading, and defaults, plus event definitions, build tooling, and project-level configuration files",
+      "layer": "layer:config",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Configuration",
+      "complexity": "moderate"
+    },
+    {
+      "id": "layer:agent-personas",
+      "type": "module",
+      "title": "Agent Personas & Skills",
+      "summary": "The multi-agent system definitions: personas, operating rules, and skills that shape how each research, creation, decision, and review agent behaves",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Agent Personas & Skills",
+      "complexity": "moderate"
+    },
+    {
+      "id": "layer:documentation",
+      "type": "module",
+      "title": "Documentation",
+      "summary": "Project planning and design documents describing the system purpose, specification, rubric, and implementation plan",
+      "layer": "layer:documentation",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Documentation",
+      "complexity": "moderate"
+    },
+    {
+      "id": "layer:output",
+      "type": "module",
+      "title": "Generated Artifacts",
+      "summary": "Run outputs produced by the Strategist for each event: briefs, evidence dossiers, implementation plans, shortlists, and spec docs",
+      "layer": "layer:output",
+      "tags": [
+        "architecture",
+        "layer"
+      ],
+      "name": "Generated Artifacts",
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:AGENTS.md",
+      "type": "document",
+      "title": "AGENTS.md",
+      "filePath": "AGENTS.md",
+      "summary": "Master directive for implementation agents: principles, handoff protocol, styling standards, definition of done",
+      "layer": "layer:documentation",
+      "tags": [
+        "document"
+      ],
+      "name": "AGENTS.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:HANDOFF.md",
+      "type": "document",
+      "title": "HANDOFF.md",
+      "filePath": "HANDOFF.md",
+      "summary": "Session handoff ledger with append-only entry log for parallel agent coordination",
+      "layer": "layer:documentation",
+      "tags": [
+        "document"
+      ],
+      "name": "HANDOFF.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:IMPLEMENTATION_PLAN.md",
+      "type": "document",
+      "title": "IMPLEMENTATION_PLAN.md",
+      "filePath": "IMPLEMENTATION_PLAN.md",
+      "summary": "Engineering spec covering architecture, agent roster, stage-gate workflow, data contracts, orchestration model, config model, failure matrix",
+      "layer": "layer:documentation",
+      "tags": [
+        "document"
+      ],
+      "name": "IMPLEMENTATION_PLAN.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:prompt.md",
+      "type": "document",
+      "title": "prompt.md",
+      "filePath": "prompt.md",
+      "summary": "System design prompt — architect brief that spec.md implements",
+      "layer": "layer:documentation",
+      "tags": [
+        "document"
+      ],
+      "name": "prompt.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "title": "README.md",
+      "filePath": "README.md",
+      "summary": "Project overview, quick start, execution guide, project structure, and what's next",
+      "layer": "layer:documentation",
+      "tags": [
+        "document"
+      ],
+      "name": "README.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:RUBRIC.md",
+      "type": "document",
+      "title": "RUBRIC.md",
+      "filePath": "RUBRIC.md",
+      "summary": "Judge's scoring sheet with 6-criterion weighted decision model (problem-fit, feasibility, innovation, stakeholder, data, demo)",
+      "layer": "layer:documentation",
+      "tags": [
+        "document"
+      ],
+      "name": "RUBRIC.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:spec.md",
+      "type": "document",
+      "title": "spec.md",
+      "filePath": "spec.md",
+      "summary": "Product spec: elevator pitch, goals, scenarios, scope, constraints, success criteria",
+      "layer": "layer:documentation",
+      "tags": [
+        "document"
+      ],
+      "name": "spec.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.agents/registry.json",
+      "type": "document",
+      "title": "registry.json",
+      "filePath": ".agents/registry.json",
+      "summary": "Machine-readable graph: personas, skills, routing table (task → context)",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "registry.json",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/README.md",
+      "type": "document",
+      "title": "README.md",
+      "filePath": ".agents/README.md",
+      "summary": "Overview of .agents directory: personas, rules, skills, and routing table",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "README.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/creation/devils-advocate.md",
+      "type": "document",
+      "title": "devils-advocate.md",
+      "filePath": ".agents/personas/creation/devils-advocate.md",
+      "summary": "Devils-advocate persona: adversarial critique of every candidate against research findings",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "devils-advocate.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/creation/innovation-scout.md",
+      "type": "document",
+      "title": "innovation-scout.md",
+      "filePath": ".agents/personas/creation/innovation-scout.md",
+      "summary": "Innovation-scout persona: divergent generation of 10-20 candidate idea cards spanning safe to bold",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "innovation-scout.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/decision/decision-lead.md",
+      "type": "document",
+      "title": "decision-lead.md",
+      "filePath": ".agents/personas/decision/decision-lead.md",
+      "summary": "Decision-lead persona: applies reviewer feedback, runs weighted scoring, drives the loop",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "decision-lead.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/orchestration/orchestrator.md",
+      "type": "document",
+      "title": "orchestrator.md",
+      "filePath": ".agents/personas/orchestration/orchestrator.md",
+      "summary": "Orchestrator persona: autonomous pipeline manager driving stage transitions, budget, gates, event bus",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "orchestrator.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/research/data-analyst.md",
+      "type": "document",
+      "title": "data-analyst.md",
+      "filePath": ".agents/personas/research/data-analyst.md",
+      "summary": "Data-analyst persona: profiles datasets and maps solution classes the data enables or precludes",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "data-analyst.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/research/event-intelligence-analyst.md",
+      "type": "document",
+      "title": "event-intelligence-analyst.md",
+      "filePath": ".agents/personas/research/event-intelligence-analyst.md",
+      "summary": "Event-intelligence-analyst persona: extracts event format, tracks, tech requirements, dates",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "event-intelligence-analyst.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/research/past-winners-analyst.md",
+      "type": "document",
+      "title": "past-winners-analyst.md",
+      "filePath": ".agents/personas/research/past-winners-analyst.md",
+      "summary": "Past-winners-analyst persona: analyzes what won this or similar events and why",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "past-winners-analyst.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/research/sponsor-stakeholder-analyst.md",
+      "type": "document",
+      "title": "sponsor-stakeholder-analyst.md",
+      "filePath": ".agents/personas/research/sponsor-stakeholder-analyst.md",
+      "summary": "Sponsor-stakeholder-analyst persona: researches sponsors, judges, and audience profile",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "sponsor-stakeholder-analyst.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/reviewer/audience-reviewer.md",
+      "type": "document",
+      "title": "audience-reviewer.md",
+      "filePath": ".agents/personas/reviewer/audience-reviewer.md",
+      "summary": "Audience-reviewer persona: reviews from audience/end-user perspective — demo-compelling, adoptable",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "audience-reviewer.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/reviewer/build-feasibility-reviewer.md",
+      "type": "document",
+      "title": "build-feasibility-reviewer.md",
+      "filePath": ".agents/personas/reviewer/build-feasibility-reviewer.md",
+      "summary": "Build-feasibility-reviewer persona: PM lens on MVP decomposition, effort vs build window, scope cuts",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "build-feasibility-reviewer.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/reviewer/judge.md",
+      "type": "document",
+      "title": "judge.md",
+      "filePath": ".agents/personas/reviewer/judge.md",
+      "summary": "Judge persona: rubric & gating expert, returns criterion-by-criterion Approve/Revise verdicts",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "judge.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/personas/reviewer/sponsor-reviewer.md",
+      "type": "document",
+      "title": "sponsor-reviewer.md",
+      "filePath": ".agents/personas/reviewer/sponsor-reviewer.md",
+      "summary": "Sponsor-reviewer persona: reviews from sponsors' perspective — goals, tracks, prize criteria",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "sponsor-reviewer.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/rules/engineering.md",
+      "type": "document",
+      "title": "engineering.md",
+      "filePath": ".agents/rules/engineering.md",
+      "summary": "Engineering rules: TypeScript strict, Node ≥22, pnpm-only, no global installs",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "engineering.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/rules/evidence.md",
+      "type": "document",
+      "title": "evidence.md",
+      "filePath": ".agents/rules/evidence.md",
+      "summary": "Evidence rules: every claim carries citation + confidence stamp; fabricated sources are bugs",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "evidence.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/rules/orchestration.md",
+      "type": "document",
+      "title": "orchestration.md",
+      "filePath": ".agents/rules/orchestration.md",
+      "summary": "Orchestration rules: stage transitions, budget enforcement, gate holds, event bus protocol",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "orchestration.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/skills/data-analysis.md",
+      "type": "document",
+      "title": "data-analysis.md",
+      "filePath": ".agents/skills/data-analysis.md",
+      "summary": "Data-analysis skill: profile datasets (csv/json/xlsx/pdf) for schema, quality, signals, solution-leverage map",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "data-analysis.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/skills/debate-protocol.md",
+      "type": "document",
+      "title": "debate-protocol.md",
+      "filePath": ".agents/skills/debate-protocol.md",
+      "summary": "Debate-protocol skill: structured critique → rebuttal → scoring → verdict → feedback-to-revision traceability",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "debate-protocol.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.agents/skills/web-ingest.md",
+      "type": "document",
+      "title": "web-ingest.md",
+      "filePath": ".agents/skills/web-ingest.md",
+      "summary": "Web-ingest skill: fetch and normalize hackathon website content with boilerplate stripping and cache",
+      "layer": "layer:agent-personas",
+      "tags": [
+        "document"
+      ],
+      "name": "web-ingest.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/cursor-hackathon-sait/approval-sheet.md",
+      "type": "document",
+      "title": "approval-sheet.md",
+      "filePath": "output/cursor-hackathon-sait/approval-sheet.md",
+      "summary": "Per-reviewer verdicts for Cursor Hackathon SAIT event run",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "approval-sheet.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/cursor-hackathon-sait/decision-brief.md",
+      "type": "document",
+      "title": "decision-brief.md",
+      "filePath": "output/cursor-hackathon-sait/decision-brief.md",
+      "summary": "Scoring model, sensitivity analysis, and runner-up flip conditions",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "decision-brief.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/cursor-hackathon-sait/evidence-dossier.md",
+      "type": "document",
+      "title": "evidence-dossier.md",
+      "filePath": "output/cursor-hackathon-sait/evidence-dossier.md",
+      "summary": "Research findings with citations for Cursor Hackathon SAIT",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "evidence-dossier.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/cursor-hackathon-sait/executive-summary.md",
+      "type": "document",
+      "title": "executive-summary.md",
+      "filePath": "output/cursor-hackathon-sait/executive-summary.md",
+      "summary": "150-word winner summary for Cursor Hackathon SAIT",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "executive-summary.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/cursor-hackathon-sait/implementation-plan.md",
+      "type": "document",
+      "title": "implementation-plan.md",
+      "filePath": "output/cursor-hackathon-sait/implementation-plan.md",
+      "summary": "MVP scope + build plan for Cursor Hackathon SAIT winner",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "implementation-plan.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/cursor-hackathon-sait/loop-log.md",
+      "type": "document",
+      "title": "loop-log.md",
+      "filePath": "output/cursor-hackathon-sait/loop-log.md",
+      "summary": "Debate rounds, verdicts, and revisions for Cursor Hackathon SAIT",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "loop-log.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/cursor-hackathon-sait/shortlist.md",
+      "type": "document",
+      "title": "shortlist.md",
+      "filePath": "output/cursor-hackathon-sait/shortlist.md",
+      "summary": "Top 3 comparative matrix for Cursor Hackathon SAIT",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "shortlist.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/cursor-hackathon-sait/spec.md",
+      "type": "document",
+      "title": "spec.md",
+      "filePath": "output/cursor-hackathon-sait/spec.md",
+      "summary": "Winning solution spec for Cursor Hackathon SAIT",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "spec.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/example/approval-sheet.md",
+      "type": "document",
+      "title": "approval-sheet.md",
+      "filePath": "output/example/approval-sheet.md",
+      "summary": "Per-reviewer verdicts for example event run",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "approval-sheet.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/example/decision-brief.md",
+      "type": "document",
+      "title": "decision-brief.md",
+      "filePath": "output/example/decision-brief.md",
+      "summary": "Scoring model and sensitivity for example event",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "decision-brief.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/example/evidence-dossier.md",
+      "type": "document",
+      "title": "evidence-dossier.md",
+      "filePath": "output/example/evidence-dossier.md",
+      "summary": "Research findings with citations for example event",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "evidence-dossier.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/example/executive-summary.md",
+      "type": "document",
+      "title": "executive-summary.md",
+      "filePath": "output/example/executive-summary.md",
+      "summary": "150-word winner summary for example event",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "executive-summary.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/example/implementation-plan.md",
+      "type": "document",
+      "title": "implementation-plan.md",
+      "filePath": "output/example/implementation-plan.md",
+      "summary": "MVP scope + build plan for example event winner",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "implementation-plan.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/example/loop-log.md",
+      "type": "document",
+      "title": "loop-log.md",
+      "filePath": "output/example/loop-log.md",
+      "summary": "Debate rounds and verdicts for example event",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "loop-log.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/example/shortlist.md",
+      "type": "document",
+      "title": "shortlist.md",
+      "filePath": "output/example/shortlist.md",
+      "summary": "Top 3 comparative matrix for example event",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "shortlist.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "document:output/example/spec.md",
+      "type": "document",
+      "title": "spec.md",
+      "filePath": "output/example/spec.md",
+      "summary": "Winning solution spec for example event",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "spec.md",
+      "complexity": "simple"
+    },
+    {
+      "id": "file:output/cursor-hackathon-sait/.cache/site-aHR0cHM6Ly9jdXJzb3JjYWxnYXJ5LmNvbS9jYWxnYXJ5LWhhY2thdGhvbi1z.txt",
+      "type": "document",
+      "title": "site-aHR0cHM6Ly9jdXJzb3JjYWxnYXJ5LmNvbS9jYWxnYXJ5LWhhY2thdGhvbi1z.txt",
+      "filePath": "output/cursor-hackathon-sait/.cache/site-aHR0cHM6Ly9jdXJzb3JjYWxnYXJ5LmNvbS9jYWxnYXJ5LWhhY2thdGhvbi1z.txt",
+      "summary": "Cached HTML content from cursorhackathon.com website",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": "site-aHR0cHM6Ly9jdXJzb3JjYWxnYXJ5LmNvbS9jYWxnYXJ5LWhhY2thdGhvbi1z.txt",
+      "complexity": "simple"
+    },
+    {
+      "id": "file:output/.gitkeep",
+      "type": "document",
+      "title": ".gitkeep",
+      "filePath": "output/.gitkeep",
+      "summary": "Git keep file for empty output directory",
+      "layer": "layer:output",
+      "tags": [
+        "document"
+      ],
+      "name": ".gitkeep",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:config/events/cursor-hackathon-sait.json",
+      "type": "config",
+      "title": "cursor-hackathon-sait.json",
+      "filePath": "config/events/cursor-hackathon-sait.json",
+      "summary": "Event config for Cursor Hackathon SAIT — May 2026",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": "cursor-hackathon-sait.json",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:config/events/example.json",
+      "type": "config",
+      "title": "example.json",
+      "filePath": "config/events/example.json",
+      "summary": "Example event config with ACME Logistics sponsor track",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": "example.json",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.gitignore",
+      "type": "config",
+      "title": ".gitignore",
+      "filePath": ".gitignore",
+      "summary": "Git ignore rules for deps, build, output, env, agent scratch",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": ".gitignore",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.npmrc",
+      "type": "config",
+      "title": ".npmrc",
+      "filePath": ".npmrc",
+      "summary": "npm config file",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": ".npmrc",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.nvmrc",
+      "type": "config",
+      "title": ".nvmrc",
+      "filePath": ".nvmrc",
+      "summary": "Node version manager config (Node ≥22)",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": ".nvmrc",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.oxlintrc.json",
+      "type": "config",
+      "title": ".oxlintrc.json",
+      "filePath": ".oxlintrc.json",
+      "summary": "OxLint configuration",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": ".oxlintrc.json",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.uaignore",
+      "type": "config",
+      "title": ".uaignore",
+      "filePath": ".uaignore",
+      "summary": "Understand-anything ignore patterns",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": ".uaignore",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "title": "package.json",
+      "filePath": "package.json",
+      "summary": "Package manifest: hackathon-strategist, scripts, dependencies",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": "package.json",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:pnpm-workspace.yaml",
+      "type": "config",
+      "title": "pnpm-workspace.yaml",
+      "filePath": "pnpm-workspace.yaml",
+      "summary": "pnpm workspace configuration",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": "pnpm-workspace.yaml",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tsconfig.app.json",
+      "type": "config",
+      "title": "tsconfig.app.json",
+      "filePath": "tsconfig.app.json",
+      "summary": "TypeScript config for app (React/Vite)",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": "tsconfig.app.json",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tsconfig.json",
+      "type": "config",
+      "title": "tsconfig.json",
+      "filePath": "tsconfig.json",
+      "summary": "Base TypeScript config",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": "tsconfig.json",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tsconfig.node.json",
+      "type": "config",
+      "title": "tsconfig.node.json",
+      "filePath": "tsconfig.node.json",
+      "summary": "TypeScript config for Node scripts",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": "tsconfig.node.json",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:vercel.json",
+      "type": "config",
+      "title": "vercel.json",
+      "filePath": "vercel.json",
+      "summary": "Vercel deployment config with SPA rewrite",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": "vercel.json",
+      "complexity": "simple"
+    },
+    {
+      "id": "config:vite.config.ts",
+      "type": "config",
+      "title": "vite.config.ts",
+      "filePath": "vite.config.ts",
+      "summary": "Vite build config with React plugin and Tailwind",
+      "layer": "layer:config",
+      "tags": [
+        "config"
+      ],
+      "name": "vite.config.ts",
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/index.css",
+      "type": "file",
+      "title": "index.css",
+      "filePath": "src/index.css",
+      "summary": "Global Tailwind CSS styles for dark-mode control room UI",
+      "layer": "layer:entry",
+      "language": "css",
+      "tags": [
+        "css",
+        "styles",
+        "tailwind"
+      ],
+      "name": "index.css",
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/App.tsx",
+      "target": "function:src/App.tsx:App",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:detectProvider",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:callAnthropic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:callOpenAICompatible",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:callLLM",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:extractJSON",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:salvageTruncatedJSON",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/registry.ts",
+      "target": "function:src/agents/registry.ts:loadAllPersonas",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/registry.ts",
+      "target": "function:src/agents/registry.ts:findPersona",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:loadPersona",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersona",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toFindings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toVerdict",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toDebateMessages",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:extractCriteria",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toScores",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/tools.ts",
+      "target": "function:src/agents/tools.ts:stripBoilerplate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/tools.ts",
+      "target": "function:src/agents/tools.ts:execTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:writeArtifacts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderSpec",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderImplementationPlan",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderShortlist",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderLoopLog",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderApprovalSheet",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:renderDecisionBrief",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/env.ts",
+      "target": "function:src/config/env.ts:loadEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/env.ts",
+      "target": "function:src/config/env.ts:requireEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:validateConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:loadConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "function:src/App.tsx:App",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:detectProvider",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:callLLM",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "function:src/agents/llm.ts:extractJSON",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/registry.ts",
+      "target": "function:src/agents/registry.ts:loadAllPersonas",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/registry.ts",
+      "target": "function:src/agents/registry.ts:findPersona",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:loadPersona",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersona",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toFindings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toVerdict",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toDebateMessages",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "function:src/agents/structured.ts:toScores",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/tools.ts",
+      "target": "function:src/agents/tools.ts:execTool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "function:src/artifacts/writer.ts:writeArtifacts",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/config/env.ts",
+      "target": "function:src/config/env.ts:loadEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/config/env.ts",
+      "target": "function:src/config/env.ts:requireEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:validateConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:loadConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/control-room/ui/components.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "file:src/config/env.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "file:src/agents/tools.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/structured.test.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/structured.test.ts",
+      "target": "file:src/agents/structured.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/artifacts/writer.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/config/defaults.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/config/types.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/broker.test.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersona",
+      "target": "function:src/agents/llm.ts:callLLM",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersona",
+      "target": "function:src/agents/llm.ts:extractJSON",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersona",
+      "target": "function:src/agents/tools.ts:execTool",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersonaById",
+      "target": "function:src/agents/runner.ts:loadPersona",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersonaById",
+      "target": "function:src/agents/runner.ts:runPersona",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/App.tsx:App",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/structured.ts",
+      "target": "file:src/agents/structured.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/agents/llm.ts",
+      "target": "file:src/agents/structured.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "function:src/control-room/server.ts:createControlRoom",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/meta.ts",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StageRail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:GateBadge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Transcript",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:GateControls",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Interject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StatusHeader",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:toFeedItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:scoreIdea",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:rank",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:sensitivityAnalysis",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:roundMadeProgress",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/broker.ts",
+      "target": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/data/idea-pool.ts",
+      "target": "class:src/data/idea-pool.ts:IdeaPool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/budget-governor.ts",
+      "target": "class:src/engine/budget-governor.ts:BudgetGovernor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/event-bus.ts",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "function:src/control-room/server.ts:createControlRoom",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/meta.ts",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StageRail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Transcript",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:GateControls",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Interject",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StatusHeader",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:scoreIdea",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:rank",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:sensitivityAnalysis",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "function:src/data/scoring.ts:roundMadeProgress",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/broker.ts",
+      "target": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/data/idea-pool.ts",
+      "target": "class:src/data/idea-pool.ts:IdeaPool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/budget-governor.ts",
+      "target": "class:src/engine/budget-governor.ts:BudgetGovernor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/event-bus.ts",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/broker.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "file:src/control-room/ui/meta.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/meta.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/data/idea-pool.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/data/scoring.test.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/data/scoring.test.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/budget-governor.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/engine/budget-governor.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/event-bus.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "target": "function:src/data/scoring.ts:scoreIdea",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "target": "function:src/data/scoring.ts:rank",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "target": "function:src/data/scoring.ts:roundMadeProgress",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/control-room/ui/components.tsx:Transcript",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/control-room/server.ts:ControlRoomServer",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/control-room/server.ts:ControlRoomServer",
+      "target": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/broker.ts",
+      "target": "file:src/control-room/broker.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/control-room/server.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/engine/event-bus.ts",
+      "target": "file:src/control-room/server.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/data/scoring.ts",
+      "target": "file:src/data/scoring.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "function:src/engine/orchestrator.integration.test.ts:makeConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:tryRun",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:stubIdeas",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/main.ts:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "function:src/research/ingest.ts:ingestEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "function:src/research/ingest.ts:fetchWithTimeout",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/parsers/csv.ts",
+      "target": "function:src/research/parsers/csv.ts:profileCSV",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/parsers/html.ts",
+      "target": "function:src/research/parsers/html.ts:normalizeHTML",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/stage-machine.ts",
+      "target": "class:src/engine/stage-machine.ts:StageMachine",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "function:src/research/ingest.ts:ingestEvent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/parsers/csv.ts",
+      "target": "function:src/research/parsers/csv.ts:profileCSV",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/parsers/html.ts",
+      "target": "function:src/research/parsers/html.ts:normalizeHTML",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/stage-machine.ts",
+      "target": "class:src/engine/stage-machine.ts:StageMachine",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "file:src/engine/orchestrator.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/artifacts/writer.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/budget-governor.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/deliberation-loop.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/persona-tasks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/stage-machine.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/research/ingest.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/agents/runner.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/engine/persona-tasks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/research/ingest.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/agents/runner.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/agents/structured.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/research/ingest.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/stage-machine.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/stage-machine.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/config/env.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/config/schema.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/engine/orchestrator.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "file:src/App.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "file:src/index.css",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "file:src/research/parsers/html.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "function:src/config/env.ts:loadEnv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "function:src/config/schema.ts:loadConfig",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "function:src/agents/llm.ts:detectProvider",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "class:src/control-room/broker.ts:DirectiveBroker",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:main",
+      "target": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/research/ingest.ts:ingestEvent",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/artifacts/writer.ts:writeArtifacts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "class:src/engine/stage-machine.ts:StageMachine",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "class:src/engine/budget-governor.ts:BudgetGovernor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:runResearch",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:runResearch",
+      "target": "function:src/agents/structured.ts:toFindings",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:ideate",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:ideate",
+      "target": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "target": "function:src/agents/structured.ts:toDebateMessages",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "target": "function:src/agents/structured.ts:toScores",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "target": "function:src/agents/structured.ts:toVerdict",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/research/ingest.ts:ingestEvent",
+      "target": "function:src/research/parsers/html.ts:normalizeHTML",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/stage-machine.ts:StageMachine",
+      "target": "class:src/engine/event-bus.ts:EventBus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/engine/persona-tasks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/orchestrator.integration.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "layer:entry",
+      "target": "file:src/main.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:entry",
+      "target": "file:src/main.tsx",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:entry",
+      "target": "file:src/App.tsx",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:entry",
+      "target": "file:src/vite-env.d.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:control-room",
+      "target": "file:src/control-room/broker.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:control-room",
+      "target": "file:src/control-room/broker.test.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:control-room",
+      "target": "file:src/control-room/server.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:control-room",
+      "target": "file:src/control-room/server.test.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:control-room",
+      "target": "file:src/control-room/ui/components.tsx",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:control-room",
+      "target": "file:src/control-room/ui/meta.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:control-room",
+      "target": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:engine",
+      "target": "file:src/engine/budget-governor.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:engine",
+      "target": "file:src/engine/deliberation-loop.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:engine",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:engine",
+      "target": "file:src/engine/orchestrator.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:engine",
+      "target": "file:src/engine/persona-tasks.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:engine",
+      "target": "file:src/engine/stage-machine.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:engine",
+      "target": "file:src/engine/orchestrator.integration.test.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:engine",
+      "target": "file:src/engine/persona-tasks.test.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:engine",
+      "target": "file:src/artifacts/writer.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agents",
+      "target": "file:src/agents/llm.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agents",
+      "target": "file:src/agents/registry.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agents",
+      "target": "file:src/agents/runner.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agents",
+      "target": "file:src/agents/structured.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agents",
+      "target": "file:src/agents/tools.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agents",
+      "target": "file:src/agents/structured.test.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:research",
+      "target": "file:src/research/ingest.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:research",
+      "target": "file:src/research/parsers/csv.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:research",
+      "target": "file:src/research/parsers/html.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:data",
+      "target": "file:src/data/idea-pool.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:data",
+      "target": "file:src/data/scoring.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:data",
+      "target": "file:src/data/scoring.test.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:data",
+      "target": "file:src/data/types.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "file:src/config/defaults.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "file:src/config/env.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "file:src/config/schema.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "file:src/config/types.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:config/events/cursor-hackathon-sait.json",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:config/events/example.json",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:.gitignore",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:.npmrc",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:.nvmrc",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:.oxlintrc.json",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:.uaignore",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:package.json",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:pnpm-workspace.yaml",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:tsconfig.app.json",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:tsconfig.json",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:tsconfig.node.json",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:vercel.json",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "config:vite.config.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:config",
+      "target": "file:src/test/setup.ts",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "config:.agents/registry.json",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/README.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/creation/devils-advocate.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/creation/innovation-scout.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/decision/decision-lead.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/orchestration/orchestrator.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/research/data-analyst.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/research/event-intelligence-analyst.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/research/past-winners-analyst.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/research/sponsor-stakeholder-analyst.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/reviewer/audience-reviewer.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/reviewer/build-feasibility-reviewer.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/reviewer/judge.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/personas/reviewer/sponsor-reviewer.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/rules/engineering.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/rules/evidence.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/rules/orchestration.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/skills/data-analysis.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/skills/debate-protocol.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:agent-personas",
+      "target": "document:.agents/skills/web-ingest.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:documentation",
+      "target": "document:AGENTS.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:documentation",
+      "target": "document:HANDOFF.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:documentation",
+      "target": "document:IMPLEMENTATION_PLAN.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:documentation",
+      "target": "document:prompt.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:documentation",
+      "target": "document:README.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:documentation",
+      "target": "document:RUBRIC.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:documentation",
+      "target": "document:spec.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/cursor-hackathon-sait/approval-sheet.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/cursor-hackathon-sait/decision-brief.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/cursor-hackathon-sait/evidence-dossier.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/cursor-hackathon-sait/executive-summary.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/cursor-hackathon-sait/implementation-plan.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/cursor-hackathon-sait/loop-log.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/cursor-hackathon-sait/shortlist.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/cursor-hackathon-sait/spec.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/example/approval-sheet.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/example/decision-brief.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/example/evidence-dossier.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/example/executive-summary.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/example/implementation-plan.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/example/loop-log.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/example/shortlist.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "document:output/example/spec.md",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "file:output/cursor-hackathon-sait/.cache/site-aHR0cHM6Ly9jdXJzb3JjYWxnYXJ5LmNvbS9jYWxnYXJ5LWhhY2thdGhvbi1z.txt",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    },
+    {
+      "source": "layer:output",
+      "target": "file:output/.gitkeep",
+      "type": "contains",
+      "weight": 1,
+      "direction": "forward"
+    }
+  ],
+  "stats": {
+    "totalNodes": 177,
+    "totalEdges": 348,
+    "nodesByType": {
+      "file": 39,
+      "function": 62,
+      "class": 7,
+      "module": 10,
+      "document": 45,
+      "config": 14
+    },
+    "nodesByLayer": {
+      "layer:config": 122,
+      "layer:entry": 2,
+      "layer:control-room": 1,
+      "layer:engine": 1,
+      "layer:agents": 1,
+      "layer:research": 1,
+      "layer:data": 1,
+      "layer:agent-personas": 21,
+      "layer:documentation": 8,
+      "layer:output": 19
+    },
+    "tourSteps": 12
+  },
+  "tour": [
+    {
+      "order": 1,
+      "title": "Project Overview",
+      "description": "The README explains what the Hackathon Strategist is: a multi-agent research and ideation system that ingests an event's website, problem statements, and datasets; researches sponsors, judges, audience, and past winners; generates candidate ideas; and then runs a debate-and-refine loop until a panel of reviewer personas approves a Top 3 and a winning solution. It also maps the runtime: an orchestrator driving staged personas, an event bus streaming to a live React control room, and a set of markdown artifacts (spec.md, implementation-plan.md) as the final deliverable. This is your roadmap for everything that follows.",
+      "nodeIds": [
+        "document:README.md"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "Application Entry Points",
+      "description": "main.ts is the CLI bootstrap: it loads environment and event configuration, detects the LLM provider, optionally launches the control-room server, runs the Orchestrator, and reports the run outcome. main.tsx is the other face of the system, a thin React entry point that mounts the control-room UI. Together they reveal the project's dual nature - a headless, scriptable pipeline and a live monitoring surface - both funneling into the same engine you will explore next.",
+      "nodeIds": [
+        "file:src/main.ts",
+        "file:src/main.tsx"
+      ],
+      "languageLesson": "main.ts relies on TypeScript ESM top-level await (enabled by \"type\": \"module\" in package.json), which lets bootstrap logic run sequentially at module scope instead of being wrapped in an async main() call."
+    },
+    {
+      "order": 3,
+      "title": "Configuration System",
+      "description": "Every run is driven by configuration, so the entry point's first job is to load it. config/types.ts defines the EventConfig shape - budgets, gates, team, sponsors, and strategy mode - that all engine layers depend on. schema.ts validates the event JSON field-by-field without external libraries, collecting every validation error before throwing. env.ts loads .env.local once and fails fast on missing variables. The example event config is a concrete instance of this schema you can trace through the rest of the tour.",
+      "nodeIds": [
+        "file:src/config/types.ts",
+        "file:src/config/schema.ts",
+        "file:src/config/env.ts",
+        "config:config/events/example.json"
+      ],
+      "languageLesson": "The config layer uses a fail-fast pattern: env.ts reads required variables at import time so a misconfigured deployment crashes at startup with a clear message instead of failing deep inside a run."
+    },
+    {
+      "order": 4,
+      "title": "Domain Data & Scoring",
+      "description": "data/types.ts is the single most-depended-upon file in the codebase (fan-in of 17), defining the shared vocabulary: personas, stages, idea cards, scores, verdicts, human directives, deliberation rounds, and the event-bus event types that every layer imports. idea-pool.ts provides the in-memory Map storage for candidate idea cards, while scoring.ts implements the weighted scoring engine with ranking, convergence detection, and sensitivity analysis. Understanding this step's types makes every later module far easier to read.",
+      "nodeIds": [
+        "file:src/data/types.ts",
+        "file:src/data/idea-pool.ts",
+        "file:src/data/scoring.ts"
+      ],
+      "languageLesson": "The event types here lean on TypeScript discriminated unions: a shared 'type' discriminant field plus a typed payload lets the event bus switch exhaustively over event kinds, so the compiler catches any unhandled case."
+    },
+    {
+      "order": 5,
+      "title": "Orchestration Engine",
+      "description": "Orchestrator is the run controller and the hub of the entire system. It drives the staged pipeline - ingest, research, synthesize, ideate, loop, finalize, artifacts - and wires together the persona callbacks, budget governor, event bus, gates, and the control-room server. With a fan-out of 15, it is the broadest-scope module: nearly every other source file is reachable from here, which is exactly why the BFS traversal from main.ts lands on it at depth 1.",
+      "nodeIds": [
+        "file:src/engine/orchestrator.ts"
+      ]
+    },
+    {
+      "order": 6,
+      "title": "Run Lifecycle & Deliberation",
+      "description": "Where the Orchestrator decides what happens, these four modules define how it happens. StageMachine drives the run through ordered stages, emitting a stage event at each transition. EventBus is the single source of truth for run events - its globalBus singleton powers the transcript, loop log, and control-room WebSocket stream. The deliberation-loop owns the iterative debate-to-score-to-review-to-approve cycle, computing the Top 3 and winner when reviewers approve or the budget runs out. BudgetGovernor enforces research time budgets and round caps, giving the loop its stopping conditions.",
+      "nodeIds": [
+        "file:src/engine/stage-machine.ts",
+        "file:src/engine/event-bus.ts",
+        "file:src/engine/deliberation-loop.ts",
+        "file:src/engine/budget-governor.ts"
+      ]
+    },
+    {
+      "order": 7,
+      "title": "Agent Execution",
+      "description": "The engine decides what to do, but the personas actually do it - and this step is the machinery in between. persona-tasks.ts (the highest fan-out file in the project) provides the engine-level callbacks that run each persona and coerce its JSON, degrading to deterministic stubs on failure. llm.ts is the multi-provider LLM client (Anthropic SDK, OmniRoute, LiteLLM) with retry logic. runner.ts loads a persona's markdown definition and executes it through the LLM, while structured.ts leniently coerces the model's JSON into the typed domain objects from Step 4. tools.ts registers webFetch, readFile, csvParse, and summarize for research-time tool use.",
+      "nodeIds": [
+        "file:src/engine/persona-tasks.ts",
+        "file:src/agents/llm.ts",
+        "file:src/agents/runner.ts",
+        "file:src/agents/structured.ts",
+        "file:src/agents/tools.ts"
+      ],
+      "languageLesson": "LLM output is unreliable JSON, so llm.ts uses resilient extraction: it first tries to parse a complete JSON object, then attempts to salvage truncated model output by re-balancing brackets before giving up and letting the persona call degrade to a stub."
+    },
+    {
+      "order": 8,
+      "title": "Agent Personas",
+      "description": "This is the multi-agent system's brain: the definitions that make each of the 12 personas behave differently. registry.ts scans the .agents/personas directory tree, parsing YAML frontmatter for metadata and providing lookup by slug; the registry.json file declares the persona catalog. The personas themselves are markdown documents - the orchestrator coordinates the run, the data-analyst pursues research, and the judge enforces the rubric - that runner.ts from Step 7 executes as prompts. These documents are the product of the system, in a real sense: they encode the strategy expertise.",
+      "nodeIds": [
+        "file:src/agents/registry.ts",
+        "config:.agents/registry.json",
+        "document:.agents/personas/orchestration/orchestrator.md",
+        "document:.agents/personas/research/data-analyst.md",
+        "document:.agents/personas/reviewer/judge.md"
+      ],
+      "languageLesson": "Agents are defined as markdown files with YAML frontmatter - the frontmatter holds metadata (slug, role, model, skills) that registry.ts parses, while the body is the persona's system prompt. This keeps agent definitions data-driven and editable without touching TypeScript."
+    },
+    {
+      "order": 9,
+      "title": "Research Ingestion",
+      "description": "The research personas from Step 8 need raw material, and ingest.ts is how the system gets it. It fetches the event website and rubric and past-winner URLs, normalizes the HTML, reads local data files, caches site content, and flags missing inputs so the run degrades gracefully. parsers/html.ts strips script, style, nav, and footer blocks and collapses whitespace into clean readable text that an LLM can actually consume. This pipeline runs in the first stage of the Orchestrator (Step 5) and feeds the data-analyst personas.",
+      "nodeIds": [
+        "file:src/research/ingest.ts",
+        "file:src/research/parsers/html.ts"
+      ]
+    },
+    {
+      "order": 10,
+      "title": "Control Room",
+      "description": "The control room is the live-ops layer first mentioned in the README and launched from main.ts. server.ts serves the built React UI over HTTP and streams event-bus events over WebSocket, accepting human interjections and resolving gates with timeout escalation. broker.ts routes those interjections to the targeted reviewer persona(s). On the frontend, useStrategistStream.ts is the React hook that connects to the WebSocket and accumulates the event stream, while components.tsx renders the stage rail, transcript, score board, verdict panel, and gate controls. This step ties the event bus from Step 6 to a real-time human interface.",
+      "nodeIds": [
+        "file:src/control-room/server.ts",
+        "file:src/control-room/broker.ts",
+        "file:src/control-room/ui/useStrategistStream.ts",
+        "file:src/control-room/ui/components.tsx"
+      ],
+      "languageLesson": "The UI uses a single custom hook (useStrategistStream) as the WebSocket bridge: it owns the connection lifecycle, replays the accumulated event history, and exposes derived state plus interject and resolveGate actions - the hook pattern keeps the socket logic out of components entirely."
+    },
+    {
+      "order": 11,
+      "title": "Artifacts & Output",
+      "description": "After the deliberation loop converges, writer.ts produces the system's actual deliverables: spec.md, implementation plan, executive summary, shortlist, evidence dossier, loop log, approval sheet, and decision brief. The example output documents show what a completed run looks like - the spec that a build team can execute immediately and the decision brief that records how the winning idea was chosen. This is the 'tell us what to build to win' promise from Step 1, made concrete.",
+      "nodeIds": [
+        "file:src/artifacts/writer.ts",
+        "document:output/example/spec.md",
+        "document:output/example/decision-brief.md"
+      ]
+    },
+    {
+      "order": 12,
+      "title": "Build & Deployment",
+      "description": "package.json ties the project together as a runnable product: it defines the strategist:run CLI script, the React build for the control room, and the test tooling used across the codebase. vercel.json configures deployment of the control-room UI to Vercel, completing the journey from a CLI-driven research pipeline to a deployable web surface.",
+      "nodeIds": [
+        "config:package.json",
+        "config:vercel.json"
+      ],
+      "languageLesson": "Because the Strategist runs as a CLI rather than a server, only the control-room UI is deployed; vercel.json uses a rewrite rule so SPA client-side routing falls back to index.html."
+    }
+  ]
+}
