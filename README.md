@@ -25,7 +25,9 @@ The Strategist uses a stage-based orchestration engine to drive a panel of 12 sp
 
 ### Option 1: Local Setup
 1. `pnpm install`
-2. `cp .env.example .env.local` — Configure one LLM provider (API Key, URL, Model).
+2. `cp .env.example .env.local` — Configure one LLM provider:
+   - **OpenAI-compatible** (OmniRoute, LiteLLM, Ollama, vLLM, etc.): set `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`
+   - **Anthropic direct**: set `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (optional `ANTHROPIC_BASE_URL`)
 3. Prepare event config: `cp config/events/example.json config/events/my-event/event.json`
 4. Run: `pnpm strategist:run -c config/events/my-event/event.json`
 

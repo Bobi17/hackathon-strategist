@@ -44,9 +44,10 @@ Options:
   --help, -h     Show this help
 
 LLM provider — sourced only from .env.local (see .env.example):
-  1. OMNIROUTE_API_KEY  → OmniRoute gateway (OMNIROUTE_BASE_URL, OMNIROUTE_MODEL)
-  2. LITELLM_API_KEY    → LiteLLM gateway   (LITELLM_BASE_URL, LITELLM_MODEL)
-  3. ANTHROPIC_API_KEY  → Anthropic direct  (ANTHROPIC_MODEL; optional ANTHROPIC_BASE_URL)
+  1. LLM_API_KEY + LLM_BASE_URL + LLM_MODEL
+     → Any OpenAI-compatible gateway (OmniRoute, LiteLLM, Ollama, vLLM, etc.)
+  2. ANTHROPIC_API_KEY + ANTHROPIC_MODEL
+     → Anthropic direct (optional ANTHROPIC_BASE_URL for gateway)ptional ANTHROPIC_BASE_URL)
 `)
     process.exit(values.help ? 0 : 1)
   }

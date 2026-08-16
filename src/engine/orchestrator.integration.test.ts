@@ -50,8 +50,7 @@ describe('Orchestrator end-to-end (stubs, no LLM)', () => {
   beforeAll(async () => {
     // Force "no provider" so every persona call degrades to a stub. Also
     // neutralise any gateway env leaked from the shell.
-    vi.stubEnv('OMNIROUTE_API_KEY', '')
-    vi.stubEnv('LITELLM_API_KEY', '')
+    vi.stubEnv('LLM_API_KEY', '')
     vi.stubEnv('ANTHROPIC_API_KEY', '')
     await mkdir(SCRATCH_ROOT, { recursive: true })
     dir = await mkdtemp(join(SCRATCH_ROOT, 'strategist-itest-'))

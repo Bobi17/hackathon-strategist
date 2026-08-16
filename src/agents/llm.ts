@@ -1,11 +1,13 @@
 // ── LLM client — multi-provider with retry + token tracking ────────────────
 //
-// Supports three providers, auto-detected from environment variables:
-//   1. Anthropic SDK   — ANTHROPIC_API_KEY set → direct Anthropic API
-//   2. OmniRoute       — OMNIROUTE_API_KEY set → OpenAI-compatible gateway
-//   3. LiteLLM         — LITELLM_API_KEY set  → OpenAI-compatible gateway
+// Supports two modes, auto-detected from environment variables:
+//   1. OpenAI-compatible gateway (OmniRoute, LiteLLM, Ollama, vLLM, LM Studio,
+//      LocalAI, etc.) — LLM_API_KEY + LLM_BASE_URL + LLM_MODEL set
+//   2. Anthropic direct API (or Anthropic-compatible gateway) — ANTHROPIC_API_KEY
+//      + ANTHROPIC_MODEL set; ANTHROPIC_BASE_URL is optional.
 //
-// Priority: OMNIROUTE > LITELLM > Anthropic.  Override per call via LLMOptions.
+// Priority: OpenAI-compatible (LLM_*) > Anthropic (ANTHROPIC_*).
+// Override per call via LLMOptions.
 //
 // Provider url/key/model come ONLY from .env.local (loaded via loadEnv in
 // main.ts) or already-exported shell env — nothing is hardcoded here. Missing
@@ -16,7 +18,7 @@ import { requireEnv } from '../config/env.js'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-export type LLMProvider = 'anthropic' | 'litellm' | 'omniroute'
+export type LLMProvider = 'anthropic' | 'openai-compatible'
 
 export interface LLMResult {
   content: string
@@ -43,35 +45,34 @@ interface ProviderConfig {
 
 // ── Provider detection ─────────────────────────────────────────────────────
 
-const PROVIDER_ENV: Record<LLMProvider, { apiKey: string; baseUrl: string; model: string }> = {
-  omniroute: { apiKey: 'OMNIROUTE_API_KEY', baseUrl: 'OMNIROUTE_BASE_URL', model: 'OMNIROUTE_MODEL' },
-  litellm: { apiKey: 'LITELLM_API_KEY', baseUrl: 'LITELLM_BASE_URL', model: 'LITELLM_MODEL' },
-  anthropic: { apiKey: 'ANTHROPIC_API_KEY', baseUrl: 'ANTHROPIC_BASE_URL', model: 'ANTHROPIC_MODEL' },
+/** Build a provider's config strictly from env — no hardcoded url/model. */
+function buildOpenAICompatible(): ProviderConfig {
+  const apiKey = requireEnv('LLM_API_KEY')
+  const baseUrl = requireEnv('LLM_BASE_URL')
+  const defaultModel = requireEnv('LLM_MODEL')
+  return { type: 'openai-compatible', baseUrl, apiKey, defaultModel }
 }
 
-/** Build a provider's config strictly from env — no hardcoded url/model. */
-function buildProvider(type: LLMProvider): ProviderConfig {
-  const env = PROVIDER_ENV[type]
-  const apiKey = requireEnv(env.apiKey)
-  const defaultModel = requireEnv(env.model)
-  // Anthropic hits the official API unless ANTHROPIC_BASE_URL is set (optional
-  // gateway route). Gateway providers (OmniRoute/LiteLLM) always need a base URL.
-  const baseUrl = type === 'anthropic' ? (process.env[env.baseUrl] ?? '') : requireEnv(env.baseUrl)
-  return { type, baseUrl, apiKey, defaultModel }
+function buildAnthropic(): ProviderConfig {
+  const apiKey = requireEnv('ANTHROPIC_API_KEY')
+  const defaultModel = requireEnv('ANTHROPIC_MODEL')
+  // ANTHROPIC_BASE_URL is optional — use official API if not set.
+  const baseUrl = process.env.ANTHROPIC_BASE_URL ?? ''
+  return { type: 'anthropic', baseUrl, apiKey, defaultModel }
 }
 
 /**
  * Detect which provider is available from environment variables.
- * Priority: OMNIROUTE > LITELLM > Anthropic. Throws if none is configured, or
- * if the selected provider's url/model are missing from `.env.local`.
+ * Priority: OpenAI-compatible (LLM_API_KEY) > Anthropic (ANTHROPIC_API_KEY).
+ * Throws if none is configured, or if the selected provider's required vars are missing.
  */
 export function detectProvider(): ProviderConfig {
-  if (process.env.OMNIROUTE_API_KEY) return buildProvider('omniroute')
-  if (process.env.LITELLM_API_KEY) return buildProvider('litellm')
-  if (process.env.ANTHROPIC_API_KEY) return buildProvider('anthropic')
+  if (process.env.LLM_API_KEY) return buildOpenAICompatible()
+  if (process.env.ANTHROPIC_API_KEY) return buildAnthropic()
   throw new Error(
-    'No LLM provider configured. Set exactly one of OMNIROUTE_API_KEY, ' +
-    'LITELLM_API_KEY, or ANTHROPIC_API_KEY in .env.local (see .env.example).',
+    'No LLM provider configured. Set either LLM_API_KEY + LLM_BASE_URL + LLM_MODEL ' +
+    '(for any OpenAI-compatible gateway: OmniRoute, LiteLLM, Ollama, vLLM, etc.) ' +
+    'OR ANTHROPIC_API_KEY + ANTHROPIC_MODEL in .env.local (see .env.example).',
   )
 }
 
@@ -181,7 +182,7 @@ export async function callLLM(
   userMessage: string,
   opts: LLMOptions = {},
 ): Promise<LLMResult> {
-  const provider = opts.provider ? buildProvider(opts.provider) : detectProvider()
+  const provider = opts.provider ? (opts.provider === 'anthropic' ? buildAnthropic() : buildOpenAICompatible()) : detectProvider()
 
   let lastError: unknown
 

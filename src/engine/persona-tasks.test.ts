@@ -36,7 +36,7 @@ const INPUT: IngestedInput = {
 }
 
 function llmResult(): LLMResult {
-  return { content: 'x', inputTokens: 1, outputTokens: 1, model: 'm', provider: 'omniroute' }
+  return { content: 'x', inputTokens: 1, outputTokens: 1, model: 'm', provider: 'openai-compatible' }
 }
 
 function runResult(persona: string, raw: string, parsed?: unknown): RunResult {
