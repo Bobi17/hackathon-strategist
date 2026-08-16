@@ -5,9 +5,15 @@ services:
       - ./config:/app/config:ro
       - ./output:/app/output
       - .env.local:/app/.env.local:ro
-    # Restrict network access to prevent exfiltration while allowing research
-    # Note: Complex network rules are best enforced via a custom docker bridge
-    # or a proxy, but we can start by isolating the container.
+    # Reach the host's LLM gateway WITHOUT `network_mode: host`.
+    # `host-gateway` maps the hostname `host.docker.internal` to the host's IP
+    # as seen from this container's isolated bridge network. The container thus
+    # stays on its own `research-net` (no host network namespace) and only one
+    # hostname entry is added — isolation is preserved, only this one route is
+    # opened. Set `LLM_BASE_URL=http://host.docker.internal:<port>/v1` in
+    # `.env.local` (see `.env.example`).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - research-net
 
