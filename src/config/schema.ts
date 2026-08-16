@@ -57,6 +57,14 @@ export function validateConfig(raw: Record<string, unknown>): ConfigError[] {
     }
   }
 
+  // Browser / fetch escalation
+  if (raw.useBrowser !== undefined && typeof raw.useBrowser !== 'boolean') {
+    errors.push({ field: 'useBrowser', message: 'useBrowser must be a boolean.' })
+  }
+  if (raw.minContentChars !== undefined && (typeof raw.minContentChars !== 'number' || raw.minContentChars <= 0)) {
+    errors.push({ field: 'minContentChars', message: 'minContentChars must be a positive number.' })
+  }
+
   // Budgets
   const budgets = raw.budgets as Record<string, unknown> | undefined
   if (budgets && typeof budgets === 'object') {

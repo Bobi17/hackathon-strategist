@@ -1,0 +1,1489 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/control-room/ui/components.tsx",
+      "type": "file",
+      "name": "components.tsx",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Control-room React components — stage rail, transcript, score board, verdict panel, pick-winner controls, ingest-auth gate panel, interject, and status header — driving the live run interface.",
+      "tags": [
+        "component",
+        "ui",
+        "event-handler"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "file",
+      "name": "useStrategistStream.ts",
+      "filePath": "src/control-room/ui/useStrategistStream.ts",
+      "summary": "React hook connecting a WebSocket to the strategist server, accumulating the event stream, and exposing derived state plus actions for gates, pick-winner (pick/feedback), and ingest-auth (retry/paste).",
+      "tags": [
+        "hook",
+        "websocket",
+        "state-management"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/data/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "src/data/types.ts",
+      "summary": "Domain type definitions for personas, stages, idea cards, scores, loop events, gate payloads, and the new IngestAuthResolution (retry / pasted / escalated) used by the browser-ingestion auth gate.",
+      "tags": [
+        "type-definition",
+        "data-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/deliberation-loop.ts",
+      "type": "file",
+      "name": "deliberation-loop.ts",
+      "filePath": "src/engine/deliberation-loop.ts",
+      "summary": "Runs the iterative debate → score → review deliberation loop with budget enforcement and non-convergence detection; now accepts a resume payload (startRound / priorRounds) to support pick-winner refinement cycles.",
+      "tags": [
+        "service",
+        "engine",
+        "event-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/orchestrator.integration.test.ts",
+      "type": "file",
+      "name": "orchestrator.integration.test.ts",
+      "filePath": "src/engine/orchestrator.integration.test.ts",
+      "summary": "Integration test for the Orchestrator running a full stubbed run, including the new auto-pick top-ranked idea case through the pick-winner gate when a server is present.",
+      "tags": [
+        "test",
+        "integration",
+        "service"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/orchestrator.ts",
+      "type": "file",
+      "name": "orchestrator.ts",
+      "filePath": "src/engine/orchestrator.ts",
+      "summary": "Run controller wiring ingest (with a persistent Playwright browser session and escalation-aware ToolContext), research, synthesis, ideation, deliberation, gates, and artifact writing into a single orchestrated flow.",
+      "tags": [
+        "service",
+        "orchestration",
+        "entry-point"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/engine/persona-tasks.test.ts",
+      "type": "file",
+      "name": "persona-tasks.test.ts",
+      "filePath": "src/engine/persona-tasks.test.ts",
+      "summary": "Unit tests for persona-tasks engine functions, including the new reviseIdeas degradation tests that keep candidate cards unchanged when the LLM is unavailable or its output is unparseable.",
+      "tags": [
+        "test",
+        "engine"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/engine/persona-tasks.ts",
+      "type": "file",
+      "name": "persona-tasks.ts",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Persona-driven engine steps — runResearch (now passing an escalation-aware ToolContext to research personas), synthesizeFindings, ideate, the new reviseIdeas pick-winner rewrite, and debate/score/review callbacks — with graceful stub degradation.",
+      "tags": [
+        "service",
+        "engine",
+        "event-handler"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/research/ingest.ts",
+      "type": "file",
+      "name": "ingest.ts",
+      "filePath": "src/research/ingest.ts",
+      "summary": "Ingestion pipeline fetching event websites, rubric, and past-winner URLs with per-URL caching, escalating through fetchWithEscalation (plain fetch → browser → human auth gate), and flagging fetch gaps.",
+      "tags": [
+        "service",
+        "ingestion",
+        "data-pipeline"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/research/browser.ts",
+      "type": "file",
+      "name": "browser.ts",
+      "filePath": "src/research/browser.ts",
+      "summary": "Playwright-backed browser session manager: lazy-loads Chromium, maintains a persistent logged-in profile under output/<slug>/.cache/browser-profile/, and provides render, openForLogin, and close for login-gated and JS-rendered pages.",
+      "tags": [
+        "service",
+        "browser-automation",
+        "ingestion"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/research/fetch.test.ts",
+      "type": "file",
+      "name": "fetch.test.ts",
+      "filePath": "src/research/fetch.test.ts",
+      "summary": "Vitest suite for fetchWithEscalation covering the full escalation chain — plain-fetch fast path, browser-render escalation, human-paste fallback, sign-in retry re-render, and fetch fallback when the browser fails.",
+      "tags": [
+        "test",
+        "ingestion",
+        "browser-automation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/research/fetch.ts",
+      "type": "file",
+      "name": "fetch.ts",
+      "filePath": "src/research/fetch.ts",
+      "summary": "Escalation fetcher implementing the plain fetch → browser render → human-in-the-loop (auth gate / paste) chain used by both the ingestion pipeline and the persona webFetch tool; never throws, degrading to a failed outcome.",
+      "tags": [
+        "service",
+        "ingestion",
+        "browser-automation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:StageRail",
+      "type": "function",
+      "name": "StageRail",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Renders the horizontal stage progress rail using STAGE_ORDER.",
+      "tags": [
+        "component",
+        "ui"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        20,
+        43
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:GateBadge",
+      "type": "function",
+      "name": "GateBadge",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Renders a colored badge for a gate decision.",
+      "tags": [
+        "component",
+        "ui"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        56,
+        67
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:Transcript",
+      "type": "function",
+      "name": "Transcript",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Renders the chronological event feed — messages, scores, verdicts, and gates — with persona labels.",
+      "tags": [
+        "component",
+        "ui"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        69,
+        138
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "type": "function",
+      "name": "ScoreBoard",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Renders the latest round scoring board by persona.",
+      "tags": [
+        "component",
+        "ui"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        142,
+        173
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "type": "function",
+      "name": "VerdictPanel",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Renders reviewer verdict chips with required-change feedback for the active round.",
+      "tags": [
+        "component",
+        "ui"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        177,
+        207
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:PickWinnerControls",
+      "type": "function",
+      "name": "PickWinnerControls",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Presents the Top 3 candidate cards for the pick-winner gate: pick one as winner or send feedback to refine.",
+      "tags": [
+        "component",
+        "ui",
+        "gate"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        218,
+        299
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:AuthGatePanel",
+      "type": "function",
+      "name": "AuthGatePanel",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Ingest-auth gate panel: prompts the human to sign in and retry, or paste the page content for a login-gated URL.",
+      "tags": [
+        "component",
+        "ui",
+        "ingestion"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        302,
+        363
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:GateControls",
+      "type": "function",
+      "name": "GateControls",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Routes active-gate actions to the right UI — approve/reject, pick-winner pick/feedback, or ingest-auth retry/paste.",
+      "tags": [
+        "component",
+        "ui",
+        "gate"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        365,
+        426
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:Interject",
+      "type": "function",
+      "name": "Interject",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Form for sending a directive to a reviewer persona (or all) mid-run.",
+      "tags": [
+        "component",
+        "ui"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        432,
+        479
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/components.tsx:StatusHeader",
+      "type": "function",
+      "name": "StatusHeader",
+      "filePath": "src/control-room/ui/components.tsx",
+      "summary": "Status bar showing connection state, run status, and event count.",
+      "tags": [
+        "component",
+        "ui"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        483,
+        503
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "function",
+      "name": "useStrategistStream",
+      "filePath": "src/control-room/ui/useStrategistStream.ts",
+      "summary": "React hook maintaining the WebSocket stream to the strategist server, deriving feed/stages/rounds/gates state and exposing actions (interject, resolveGate, pickWinner, sendWinnerFeedback, ingestRetry, ingestPaste, launchRun).",
+      "tags": [
+        "hook",
+        "websocket",
+        "state-management"
+      ],
+      "complexity": "complex",
+      "lineRange": [
+        70,
+        278
+      ]
+    },
+    {
+      "id": "function:src/control-room/ui/useStrategistStream.ts:toFeedItem",
+      "type": "function",
+      "name": "toFeedItem",
+      "filePath": "src/control-room/ui/useStrategistStream.ts",
+      "summary": "Maps a raw stream event to a typed FeedItem for the transcript.",
+      "tags": [
+        "utility",
+        "serialization"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        55,
+        68
+      ]
+    },
+    {
+      "id": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "function",
+      "name": "runDeliberationLoop",
+      "filePath": "src/engine/deliberation-loop.ts",
+      "summary": "Runs the iterative debate → score → review loop with budget enforcement, non-convergence detection, and optional resume (startRound/priorRounds) for refinement cycles.",
+      "tags": [
+        "service",
+        "engine",
+        "event-handler"
+      ],
+      "complexity": "complex",
+      "lineRange": [
+        30,
+        147
+      ]
+    },
+    {
+      "id": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "class",
+      "name": "Orchestrator",
+      "filePath": "src/engine/orchestrator.ts",
+      "summary": "Run controller that creates the persistent browser session and escalation-aware ToolContext, then drives ingest, research, synthesis, ideation, deliberation, gates, and artifact writing.",
+      "tags": [
+        "service",
+        "orchestration",
+        "entry-point"
+      ],
+      "complexity": "complex",
+      "lineRange": [
+        48,
+        255
+      ]
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "function",
+      "name": "runResearch",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Runs the research personas in parallel with tools enabled and the escalation-aware ToolContext, collecting findings and degraded flags.",
+      "tags": [
+        "service",
+        "engine",
+        "agent"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        138,
+        176
+      ]
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "function",
+      "name": "synthesizeFindings",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Synthesizes research findings across personas via the synthesizer persona.",
+      "tags": [
+        "service",
+        "engine"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        187,
+        201
+      ]
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "function",
+      "name": "ideate",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Generates candidate idea cards from the synthesis via the innovation-scout persona, degrading to stub ideas.",
+      "tags": [
+        "service",
+        "engine",
+        "generation"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        205,
+        249
+      ]
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:stubIdeas",
+      "type": "function",
+      "name": "stubIdeas",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Deterministic fallback idea generator used when the LLM is unavailable.",
+      "tags": [
+        "fallback",
+        "utility",
+        "data-model"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        252,
+        289
+      ]
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:reviseIdeas",
+      "type": "function",
+      "name": "reviseIdeas",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Rewrites the Top 3 candidate cards from human pick-winner feedback and last-round verdicts, keeping stable idea ids; degrades to unchanged cards when the LLM fails.",
+      "tags": [
+        "service",
+        "engine",
+        "refinement"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        300,
+        341
+      ]
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "function",
+      "name": "makeDebateCallback",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Builds the debate round callback that runs debate personas and formats their messages.",
+      "tags": [
+        "factory",
+        "event-handler"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        345,
+        375
+      ]
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "function",
+      "name": "makeScoreCallback",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Builds the scoring callback that runs the data-analyst persona to score candidates.",
+      "tags": [
+        "factory",
+        "event-handler"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        377,
+        404
+      ]
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "function",
+      "name": "makeReviewCallback",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Builds the review callback that runs the reviewer panel, collects verdicts, and resolves directives on approval.",
+      "tags": [
+        "factory",
+        "event-handler"
+      ],
+      "complexity": "complex",
+      "lineRange": [
+        406,
+        510
+      ]
+    },
+    {
+      "id": "function:src/engine/persona-tasks.ts:tryRun",
+      "type": "function",
+      "name": "tryRun",
+      "filePath": "src/engine/persona-tasks.ts",
+      "summary": "Runs a persona via runPersonaById with one empty-output retry, flagging the run as degraded on failure.",
+      "tags": [
+        "utility",
+        "service",
+        "retry"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        38,
+        71
+      ]
+    },
+    {
+      "id": "function:src/research/ingest.ts:ingestEvent",
+      "type": "function",
+      "name": "ingestEvent",
+      "filePath": "src/research/ingest.ts",
+      "summary": "Ingests all event inputs — website URLs, rubric, past winners — with per-URL disk caching and escalation-aware fetching, returning site sections and gaps.",
+      "tags": [
+        "service",
+        "ingestion",
+        "data-pipeline"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        26,
+        87
+      ]
+    },
+    {
+      "id": "function:src/research/browser.ts:createBrowserSession",
+      "type": "function",
+      "name": "createBrowserSession",
+      "filePath": "src/research/browser.ts",
+      "summary": "Lazy-loads Playwright and creates a persistent Chromium browser session (profile dir, headless flag, text cap) exposing render, openForLogin, and close; returns null when the browser engine is unavailable.",
+      "tags": [
+        "factory",
+        "browser-automation",
+        "service"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        38,
+        128
+      ]
+    },
+    {
+      "id": "function:src/research/fetch.ts:fetchWithTimeout",
+      "type": "function",
+      "name": "fetchWithTimeout",
+      "filePath": "src/research/fetch.ts",
+      "summary": "Plain fetch with a bounded AbortSignal timeout and a research-bot user agent, returning text or null.",
+      "tags": [
+        "utility",
+        "networking",
+        "timeout"
+      ],
+      "complexity": "simple",
+      "lineRange": [
+        32,
+        43
+      ]
+    },
+    {
+      "id": "function:src/research/fetch.ts:fetchWithEscalation",
+      "type": "function",
+      "name": "fetchWithEscalation",
+      "filePath": "src/research/fetch.ts",
+      "summary": "Fetches a URL escalating from plain fetch to browser render to a human auth gate (sign-in retry or pasted content), falling back to fetched content and never throwing.",
+      "tags": [
+        "service",
+        "ingestion",
+        "escalation"
+      ],
+      "complexity": "moderate",
+      "lineRange": [
+        49,
+        91
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "file:src/control-room/ui/meta.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/engine/budget-governor.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.integration.test.ts",
+      "target": "file:src/engine/orchestrator.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/agents/tools.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/artifacts/writer.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/data/scoring.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/budget-governor.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/deliberation-loop.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/persona-tasks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/stage-machine.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/research/browser.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/research/ingest.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/agents/runner.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/engine/persona-tasks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.test.ts",
+      "target": "file:src/research/ingest.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/agents/runner.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/agents/structured.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/agents/tools.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/research/ingest.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "file:src/research/fetch.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/fetch.test.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/fetch.test.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/fetch.test.ts",
+      "target": "file:src/research/browser.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/fetch.test.ts",
+      "target": "file:src/research/fetch.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "file:src/research/browser.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "file:src/research/parsers/html.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StageRail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:GateBadge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Transcript",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:PickWinnerControls",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:AuthGatePanel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:GateControls",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Interject",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StatusHeader",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:toFeedItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:stubIdeas",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:reviseIdeas",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:tryRun",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "function:src/research/ingest.ts:ingestEvent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/browser.ts",
+      "target": "function:src/research/browser.ts:createBrowserSession",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "function:src/research/fetch.ts:fetchWithTimeout",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "function:src/research/fetch.ts:fetchWithEscalation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StageRail",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Transcript",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:PickWinnerControls",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:AuthGatePanel",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:GateControls",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:Interject",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/components.tsx",
+      "target": "function:src/control-room/ui/components.tsx:StatusHeader",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/useStrategistStream.ts",
+      "target": "function:src/control-room/ui/useStrategistStream.ts:useStrategistStream",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/deliberation-loop.ts",
+      "target": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "class:src/engine/orchestrator.ts:Orchestrator",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:synthesizeFindings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:ideate",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:reviseIdeas",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/ingest.ts",
+      "target": "function:src/research/ingest.ts:ingestEvent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/browser.ts",
+      "target": "function:src/research/browser.ts:createBrowserSession",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "function:src/research/fetch.ts:fetchWithTimeout",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "function:src/research/fetch.ts:fetchWithEscalation",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/research/ingest.ts:ingestEvent",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:runResearch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/engine/persona-tasks.ts:reviseIdeas",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/research/browser.ts:createBrowserSession",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:runResearch",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:tryRun",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/research/ingest.ts:ingestEvent",
+      "target": "function:src/research/fetch.ts:fetchWithEscalation",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/deliberation-loop.ts:runDeliberationLoop",
+      "target": "function:src/data/scoring.ts:mergeWeights",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/research/fetch.ts:fetchWithEscalation",
+      "target": "function:src/research/parsers/html.ts:normalizeHTML",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeReviewCallback",
+      "target": "function:src/agents/structured.ts:toVerdict",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeDebateCallback",
+      "target": "function:src/agents/structured.ts:toDebateMessages",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:runResearch",
+      "target": "function:src/agents/structured.ts:toFindings",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:ideate",
+      "target": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:reviseIdeas",
+      "target": "function:src/agents/structured.ts:toIdeaCards",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/engine/persona-tasks.ts:makeScoreCallback",
+      "target": "function:src/agents/structured.ts:toScores",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:src/engine/orchestrator.ts:Orchestrator",
+      "target": "function:src/artifacts/writer.ts:writeArtifacts",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/control-room/ui/components.tsx:Transcript",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/control-room/ui/components.tsx:ScoreBoard",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/control-room/ui/components.tsx:VerdictPanel",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/control-room/ui/components.tsx:Interject",
+      "target": "function:src/control-room/ui/meta.ts:personaMeta",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/research/fetch.ts",
+      "target": "file:src/research/fetch.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/engine/orchestrator.integration.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/engine/persona-tasks.ts",
+      "target": "file:src/engine/persona-tasks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/engine/orchestrator.ts",
+      "target": "file:src/research/fetch.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

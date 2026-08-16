@@ -15,9 +15,10 @@ export const DEFAULT_CONFIG: Required<
     maxRounds: 3,
     perRoundMinutes: 20,
     continueWithoutPause: false,
+    refineRounds: 3,
   },
   gates: {
     approveTop3: true,
-    approveWinner: true,
+    pickWinner: true,
   },
 }

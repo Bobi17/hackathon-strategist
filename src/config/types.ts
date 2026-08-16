@@ -19,6 +19,10 @@ export interface EventConfig {
   outputDir?: string
   model?: Record<string, string>
   concurrency?: number
+  /** Force the browser engine for all website/past-winners fetches (SPA / login-gated events). Default false — escalate automatically. */
+  useBrowser?: boolean
+  /** Normalized-content length (chars) below which a fetch is treated as too thin and escalated to the browser engine. Default 300. */
+  minContentChars?: number
 }
 
 export interface SponsorInfo {
@@ -38,9 +42,14 @@ export interface BudgetConfig {
   maxRounds?: number
   perRoundMinutes?: number
   continueWithoutPause?: boolean
+  /** Max pick-winner feedback iterations (each rewrites the Top 3 + re-deliberates). Default 3. */
+  refineRounds?: number
 }
 
 export interface GateConfig {
   approveTop3?: boolean
+  /** Replaced by pickWinner — kept for config-file backward compatibility (ignored). */
   approveWinner?: boolean
+  /** Interactive winner checkpoint: present the Top 3, let the human pick one or give feedback to refine. Default on in ui mode. */
+  pickWinner?: boolean
 }

@@ -19,7 +19,7 @@ import { validateConfig } from '../config/schema.js'
 import type { EventConfig } from '../config/types.js'
 import type { RunResult } from '../engine/orchestrator.js'
 import { DirectiveBroker } from './broker.js'
-import type { PanelPersonaId } from '../data/types.js'
+import type { IdeaCard, IngestAuthResolution, PanelPersonaId, PickWinnerResolution } from '../data/types.js'
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -49,8 +49,11 @@ export interface ControlRoomOptions {
 
 export type RunStatus = 'idle' | 'starting' | 'running' | 'complete' | 'error'
 
+type GateValue = boolean | PickWinnerResolution | IngestAuthResolution
+
 interface PendingGate {
-  resolve: (approved: boolean) => void
+  /** Boolean gates resolve `true/false`; pick-winner and ingest-auth resolve richer results. */
+  resolve: (value: GateValue) => void
   timer?: ReturnType<typeof setTimeout>
 }
 
@@ -197,7 +200,7 @@ export class ControlRoomServer {
     }
 
     return new Promise<boolean>((resolve) => {
-      const pending: PendingGate = { resolve }
+      const pending: PendingGate = { resolve: (value) => resolve(value === true) }
       if (this.#gateTimeoutMs > 0) {
         pending.timer = setTimeout(() => {
           this.#pendingGates.delete(gate)
@@ -209,14 +212,113 @@ export class ControlRoomServer {
     })
   }
 
+  /**
+   * Present the Top 3 for a pick-or-feedback decision. In auto mode (headless /
+   * continue-without-pause) it auto-picks the top-ranked idea; otherwise it
+   * blocks until the human picks one, sends feedback to refine the ideas, or
+   * the timeout escalates.
+   */
+  async requestPickWinner(top3: IdeaCard[]): Promise<PickWinnerResolution> {
+    this.#bus.emit({ kind: 'message', round: 0, persona: 'orchestrator', text: 'Top 3 ready — pick a winner or send feedback to refine.', citations: [] })
+    this.#bus.emit({ kind: 'gate', gate: 'pickWinner', decision: 'requested', payload: { top3 } })
+
+    if (this.autoResolveGates) {
+      this.#bus.emit({ kind: 'gate', gate: 'pickWinner', decision: 'resolved' })
+      return { kind: 'picked', ideaId: top3[0]?.id ?? '' }
+    }
+
+    return new Promise<PickWinnerResolution>((resolve) => {
+      const pending: PendingGate = {
+        resolve: (value) =>
+          resolve(typeof value === 'boolean' ? { kind: 'escalated' } : (value as PickWinnerResolution)),
+      }
+      if (this.#gateTimeoutMs > 0) {
+        pending.timer = setTimeout(() => {
+          this.#pendingGates.delete('pickWinner')
+          this.#bus.emit({ kind: 'gate', gate: 'pickWinner', decision: 'escalated' })
+          resolve({ kind: 'escalated' })
+        }, this.#gateTimeoutMs)
+      }
+      this.#pendingGates.set('pickWinner', pending)
+    })
+  }
+
+  /**
+   * Present a login-gated URL to the human. In auto mode (headless /
+   * continue-without-pause) it resolves instantly to `{ kind: 'escalated' }`;
+   * otherwise it blocks until the human signals they've signed in (retry —
+   * the orchestrator re-renders with the logged-in session), pastes the page
+   * content, or the timeout escalates.
+   */
+  async requestIngestAuth(url: string): Promise<IngestAuthResolution> {
+    this.#bus.emit({
+      kind: 'message', round: 0, persona: 'orchestrator',
+      text: `A page needs your sign-in to fetch: ${url}`, citations: [],
+    })
+    this.#bus.emit({ kind: 'gate', gate: 'ingest-auth', decision: 'requested', payload: { url } })
+
+    if (this.autoResolveGates) {
+      this.#bus.emit({ kind: 'gate', gate: 'ingest-auth', decision: 'resolved' })
+      return { kind: 'escalated' }
+    }
+
+    return new Promise<IngestAuthResolution>((resolve) => {
+      const pending: PendingGate = {
+        resolve: (value) =>
+          resolve(typeof value === 'boolean' ? { kind: 'escalated' } : (value as IngestAuthResolution)),
+      }
+      if (this.#gateTimeoutMs > 0) {
+        pending.timer = setTimeout(() => {
+          this.#pendingGates.delete('ingest-auth')
+          this.#bus.emit({ kind: 'gate', gate: 'ingest-auth', decision: 'escalated' })
+          resolve({ kind: 'escalated' })
+        }, this.#gateTimeoutMs)
+      }
+      this.#pendingGates.set('ingest-auth', pending)
+    })
+  }
+
   /** Resolve a gate from a WS message. Returns false if no gate is pending. */
-  #resolveGate(gate: string, approved: boolean): boolean {
-    const pending = this.#pendingGates.get(gate)
+  #resolveGate(msg: { gate: string; decision: string; pick?: string; message?: string }): boolean {
+    const pending = this.#pendingGates.get(msg.gate)
     if (!pending) return false
-    this.#pendingGates.delete(gate)
+    this.#pendingGates.delete(msg.gate)
     if (pending.timer) clearTimeout(pending.timer)
-    this.#bus.emit({ kind: 'gate', gate, decision: 'resolved' })
-    pending.resolve(approved)
+
+    // The ingest-auth gate: human signed in (re-render) or pasted content.
+    if (msg.gate === 'ingest-auth') {
+      if (msg.decision === 'retry') {
+        this.#bus.emit({ kind: 'gate', gate: msg.gate, decision: 'retry' })
+        pending.resolve({ kind: 'retry' })
+      } else if (msg.decision === 'pasted' && msg.message) {
+        this.#bus.emit({ kind: 'gate', gate: msg.gate, decision: 'pasted', message: msg.message })
+        pending.resolve({ kind: 'pasted', text: msg.message })
+      } else {
+        // Malformed ingest-auth message → escalate so the run never deadlocks.
+        this.#bus.emit({ kind: 'gate', gate: msg.gate, decision: 'escalated' })
+        pending.resolve({ kind: 'escalated' })
+      }
+      return true
+    }
+
+    // The pick-winner gate resolves to a richer result than approve/reject.
+    if (msg.gate === 'pickWinner') {
+      if (msg.decision === 'picked' && msg.pick) {
+        this.#bus.emit({ kind: 'gate', gate: msg.gate, decision: 'picked' })
+        pending.resolve({ kind: 'picked', ideaId: msg.pick })
+      } else if (msg.decision === 'feedback' && msg.message) {
+        this.#bus.emit({ kind: 'gate', gate: msg.gate, decision: 'feedback', message: msg.message })
+        pending.resolve({ kind: 'feedback', message: msg.message })
+      } else {
+        // Malformed pick-winner message → escalate so the run never deadlocks.
+        this.#bus.emit({ kind: 'gate', gate: msg.gate, decision: 'escalated' })
+        pending.resolve({ kind: 'escalated' })
+      }
+      return true
+    }
+
+    this.#bus.emit({ kind: 'gate', gate: msg.gate, decision: 'resolved' })
+    pending.resolve(msg.decision === 'approved')
     return true
   }
 
@@ -301,7 +403,7 @@ export class ControlRoomServer {
         return
       }
       case 'gate': {
-        const resolved = this.#resolveGate(msg.gate, msg.decision === 'approved')
+        const resolved = this.#resolveGate(msg)
         ws.send(JSON.stringify({ type: 'gate-result', gate: msg.gate, ok: resolved, ts: Date.now() }))
         return
       }
@@ -312,7 +414,7 @@ export class ControlRoomServer {
 type ClientMessage =
   | { type: 'ping' }
   | { type: 'interject'; persona?: PanelPersonaId | 'all'; message: string }
-  | { type: 'gate'; gate: string; decision: 'approved' | 'rejected' }
+  | { type: 'gate'; gate: string; decision: 'approved' | 'rejected' | 'picked' | 'feedback' | 'retry' | 'pasted'; pick?: string; message?: string }
 
 /** Convenience: build a server wired to the global bus + a fresh broker. */
 export function createControlRoom(opts?: Partial<ControlRoomOptions>): ControlRoomServer {

@@ -59,7 +59,14 @@ export default function App() {
         {/* Right rail — 2/5 */}
         <section className="lg:col-span-2 space-y-4">
           {stream.activeGate && (
-            <GateControls activeGate={stream.activeGate} onResolve={stream.resolveGate} />
+            <GateControls
+              activeGate={stream.activeGate}
+              onResolve={stream.resolveGate}
+              onPick={stream.pickWinner}
+              onFeedback={stream.sendWinnerFeedback}
+              onIngestRetry={stream.ingestRetry}
+              onIngestPaste={stream.ingestPaste}
+            />
           )}
 
           <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">

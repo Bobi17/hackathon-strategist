@@ -14,7 +14,7 @@ vi.mock('../agents/runner.js', () => ({
   runPersonaById: vi.fn(),
 }))
 
-import { runResearch } from './persona-tasks.js'
+import { reviseIdeas, runResearch } from './persona-tasks.js'
 import { runPersonaById } from '../agents/runner.js'
 
 const mockRun = vi.mocked(runPersonaById)
@@ -87,5 +87,37 @@ describe('runResearch empty-output retry', () => {
     expect(mockRun).toHaveBeenCalledTimes(8)
     expect(res.findings).toHaveLength(0)
     expect(res.degraded.length).toBeGreaterThan(0)
+  })
+})
+
+describe('reviseIdeas degradation', () => {
+  const cards = [
+    { id: 'idea-1', oneLinePitch: 'p1', problemFit: '', targetUser: '', techApproach: '', differentiator: '', dataLeverage: '', gatingFit: '', buildScope: '' },
+    { id: 'idea-2', oneLinePitch: 'p2', problemFit: '', targetUser: '', techApproach: '', differentiator: '', dataLeverage: '', gatingFit: '', buildScope: '' },
+  ]
+
+  it('returns the candidates unchanged when the LLM is unavailable', async () => {
+    // Empty raw output → tryRun retries, then returns unparsed → reviseIdeas
+    // degrades to the unchanged candidates. (After mockReset(), throwing or
+    // rejecting inside the mock trips vitest's unhandled-error detector, so
+    // match the existing empty-output style instead.)
+    mockRun.mockResolvedValue(runResult('innovation-scout', ''))
+    const res = await reviseIdeas(CONFIG, cards, 'make it bigger', [], [], 'synthesis')
+    expect(res).toBe(cards)
+  })
+
+  it('returns the candidates unchanged when the LLM output is unparseable', async () => {
+    mockRun.mockResolvedValue(runResult('innovation-scout', 'not json'))
+    const res = await reviseIdeas(CONFIG, cards, 'make it bigger', [], [], 'synthesis')
+    expect(res).toBe(cards)
+  })
+
+  it('rewrites the cards but keeps stable ids when the LLM returns a revision', async () => {
+    const revised = { ideas: cards.map((c) => ({ ...c, oneLinePitch: `${c.oneLinePitch} v2` })) }
+    mockRun.mockResolvedValue(runResult('innovation-scout', JSON.stringify(revised), revised))
+    const res = await reviseIdeas(CONFIG, cards, 'make it bigger', [], [], 'synthesis')
+    expect(res).toHaveLength(2)
+    expect(res.map((c) => c.id)).toEqual(['idea-1', 'idea-2'])
+    expect(res[0]!.oneLinePitch).toBe('p1 v2')
   })
 })

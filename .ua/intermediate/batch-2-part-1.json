@@ -1,0 +1,723 @@
+{
+  "nodes": [
+    {
+      "id": "document:.agents/skills/web-ingest.md",
+      "type": "document",
+      "name": "web-ingest.md",
+      "filePath": ".agents/skills/web-ingest.md",
+      "summary": "Agent skill defining the web-ingestion procedure for research personas, updated to document the fetch-with-escalation chain (plain fetch → Playwright browser render → interactive auth gate) and cache reuse across runs.",
+      "tags": [
+        "documentation",
+        "web-ingest",
+        "research"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Project overview and getting-started guide covering quick start, step-by-step execution, project structure, and a new Browser + paste ingestion section describing login-gated and JS-rendered page handling.",
+      "tags": [
+        "documentation",
+        "entry-point",
+        "overview"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "package.json",
+      "summary": "npm package manifest for the Hackathon Strategist; adds the Playwright dependency that powers the new browser-based ingestion path.",
+      "tags": [
+        "configuration",
+        "dependencies",
+        "build-system"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:pnpm-lock.yaml",
+      "type": "config",
+      "name": "pnpm-lock.yaml",
+      "filePath": "pnpm-lock.yaml",
+      "summary": "pnpm lockfile pinning the full dependency tree, including the newly added Playwright packages and their transitive browser binaries.",
+      "tags": [
+        "configuration",
+        "dependencies",
+        "lockfile"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Lockfile now resolves the playwright package and its Chromium browser binary download entries under snapshots."
+    },
+    {
+      "id": "file:src/App.tsx",
+      "type": "file",
+      "name": "App.tsx",
+      "filePath": "src/App.tsx",
+      "summary": "Root React component for the control-room dashboard; renders the strategist stream and wires the pick-winner and ingest-auth gate controls to the WebSocket stream.",
+      "tags": [
+        "component",
+        "entry-point",
+        "control-room"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/agents/runner.ts",
+      "type": "file",
+      "name": "runner.ts",
+      "filePath": "src/agents/runner.ts",
+      "summary": "Loads persona markdown files and runs persona LLM sessions, threading an optional tool context so personas can use the escalation-aware webFetch tool for login-gated pages.",
+      "tags": [
+        "service",
+        "llm",
+        "agent-runtime"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/agents/tools.ts",
+      "type": "file",
+      "name": "tools.ts",
+      "filePath": "src/agents/tools.ts",
+      "summary": "Defines the persona tool set (webFetch, readFile, csvParse, summarize) and tool registry; webFetch now accepts a ToolContext supplying an escalation-aware fetch for browser-rendered and auth-gated pages.",
+      "tags": [
+        "tooling",
+        "agent-runtime",
+        "data-pipeline"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/config/defaults.ts",
+      "type": "file",
+      "name": "defaults.ts",
+      "filePath": "src/config/defaults.ts",
+      "summary": "Default event configuration values, updated so the pick-winner gate is enabled by default with a three-round refinement budget.",
+      "tags": [
+        "config",
+        "defaults",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/config/schema.ts",
+      "type": "file",
+      "name": "schema.ts",
+      "filePath": "src/config/schema.ts",
+      "summary": "Validates and loads event configuration from raw JSON, adding checks for the new useBrowser and minContentChars browser-escalation settings.",
+      "tags": [
+        "validation",
+        "config",
+        "api-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/config/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "src/config/types.ts",
+      "summary": "TypeScript type definitions for the event configuration, extended with useBrowser, minContentChars, refineRounds, and the pickWinner gate flag.",
+      "tags": [
+        "type-definition",
+        "config",
+        "data-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/control-room/server.test.ts",
+      "type": "file",
+      "name": "server.test.ts",
+      "filePath": "src/control-room/server.test.ts",
+      "summary": "Vitest suite for the control-room WebSocket server, covering the new pick-winner and ingest-auth gates (picked, feedback, retry, pasted decisions) alongside existing run-control behavior.",
+      "tags": [
+        "test",
+        "control-room",
+        "api-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/control-room/server.ts",
+      "type": "file",
+      "name": "server.ts",
+      "filePath": "src/control-room/server.ts",
+      "summary": "Control-room HTTP/WebSocket server exposing the run lifecycle and gate resolution, adding requestPickWinner and requestIngestAuth checkpoints for human-in-the-loop winner selection and login-gated page fetching.",
+      "tags": [
+        "api-handler",
+        "service",
+        "event-handler"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/control-room/ui/LaunchForm.tsx",
+      "type": "file",
+      "name": "LaunchForm.tsx",
+      "filePath": "src/control-room/ui/LaunchForm.tsx",
+      "summary": "Launch configuration form that builds an event config from form fields or raw JSON, updated to expose the pick-the-winner gate option.",
+      "tags": [
+        "component",
+        "control-room",
+        "form"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/App.tsx:App",
+      "type": "function",
+      "name": "App",
+      "filePath": "src/App.tsx",
+      "lineRange": [
+        19,
+        103
+      ],
+      "summary": "Root control-room dashboard component that renders stream events, round timelines, and gate controls (approve, pick-winner, ingest-auth) from the strategist WebSocket stream.",
+      "tags": [
+        "component",
+        "entry-point",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/runner.ts:loadPersona",
+      "type": "function",
+      "name": "loadPersona",
+      "filePath": "src/agents/runner.ts",
+      "lineRange": [
+        32,
+        55
+      ],
+      "summary": "Loads a persona markdown file and parses its frontmatter (model, temperature, description) plus body into a PersonaFile.",
+      "tags": [
+        "utility",
+        "agent-runtime",
+        "serialization"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/runner.ts:runPersona",
+      "type": "function",
+      "name": "runPersona",
+      "filePath": "src/agents/runner.ts",
+      "lineRange": [
+        73,
+        143
+      ],
+      "summary": "Runs a persona LLM session with an optional tool loop, executing registered tools (such as the escalation-aware webFetch) up to maxToolRounds times.",
+      "tags": [
+        "service",
+        "llm",
+        "agent-runtime"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/agents/runner.ts:runPersonaById",
+      "type": "function",
+      "name": "runPersonaById",
+      "filePath": "src/agents/runner.ts",
+      "lineRange": [
+        148,
+        159
+      ],
+      "summary": "Resolves a persona ID to its markdown file and runs it, returning the LLM result or null when unavailable.",
+      "tags": [
+        "service",
+        "agent-runtime",
+        "llm"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/tools.ts:execTool",
+      "type": "function",
+      "name": "execTool",
+      "filePath": "src/agents/tools.ts",
+      "lineRange": [
+        143,
+        151
+      ],
+      "summary": "Looks up a tool by name in the registry and executes it with args and an optional ToolContext for escalation-aware fetching.",
+      "tags": [
+        "tooling",
+        "agent-runtime",
+        "dispatcher"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/agents/tools.ts:stripBoilerplate",
+      "type": "function",
+      "name": "stripBoilerplate",
+      "filePath": "src/agents/tools.ts",
+      "lineRange": [
+        60,
+        71
+      ],
+      "summary": "Removes script, style, nav, footer, and header blocks plus HTML tags from fetched markup, collapsing whitespace to plain text.",
+      "tags": [
+        "utility",
+        "serialization",
+        "data-pipeline"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/config/schema.ts:validateConfig",
+      "type": "function",
+      "name": "validateConfig",
+      "filePath": "src/config/schema.ts",
+      "lineRange": [
+        12,
+        79
+      ],
+      "summary": "Validates a raw event-config object, returning per-field errors including the new useBrowser and minContentChars browser-escalation checks.",
+      "tags": [
+        "validation",
+        "config",
+        "api-handler"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/config/schema.ts:loadConfig",
+      "type": "function",
+      "name": "loadConfig",
+      "filePath": "src/config/schema.ts",
+      "lineRange": [
+        85,
+        93
+      ],
+      "summary": "Loads a config file, validates it, and throws a formatted error listing all validation failures.",
+      "tags": [
+        "config",
+        "validation",
+        "api-handler"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "class",
+      "name": "ControlRoomServer",
+      "filePath": "src/control-room/server.ts",
+      "lineRange": [
+        60,
+        412
+      ],
+      "summary": "WebSocket + HTTP server for the control room: run lifecycle, run status broadcasts, and gate resolution including the new pick-winner and ingest-auth human-in-the-loop checkpoints.",
+      "tags": [
+        "api-handler",
+        "service",
+        "event-handler"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/control-room/server.ts:createControlRoom",
+      "type": "function",
+      "name": "createControlRoom",
+      "filePath": "src/control-room/server.ts",
+      "lineRange": [
+        420,
+        423
+      ],
+      "summary": "Factory that creates a ControlRoomServer wired to the global event bus and a fresh directive broker.",
+      "tags": [
+        "factory",
+        "control-room",
+        "service"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/control-room/ui/LaunchForm.tsx:LaunchForm",
+      "type": "function",
+      "name": "LaunchForm",
+      "filePath": "src/control-room/ui/LaunchForm.tsx",
+      "lineRange": [
+        110,
+        310
+      ],
+      "summary": "Collects event configuration (websites, sponsors, gates including the pickWinner option) via form fields or a JSON textarea and emits a config object through onLaunch.",
+      "tags": [
+        "component",
+        "form",
+        "control-room"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/control-room/ui/LaunchForm.tsx:buildConfig",
+      "type": "function",
+      "name": "buildConfig",
+      "filePath": "src/control-room/ui/LaunchForm.tsx",
+      "lineRange": [
+        82,
+        104
+      ],
+      "summary": "Assembles a raw config object from the form state, slugifying names, trimming team skills, and parsing numeric fields.",
+      "tags": [
+        "utility",
+        "serialization",
+        "config"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/control-room/ui/components.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/control-room/ui/useStrategistStream.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "file:src/agents/llm.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "file:src/agents/tools.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/config/defaults.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/config/types.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/control-room/server.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.test.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/config/schema.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/config/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/control-room/broker.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/data/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/engine/event-bus.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/engine/orchestrator.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "function:src/App.tsx:App",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "function:src/App.tsx:App",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:loadPersona",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:loadPersona",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersona",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersona",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/runner.ts",
+      "target": "function:src/agents/runner.ts:runPersonaById",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/tools.ts",
+      "target": "function:src/agents/tools.ts:execTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/agents/tools.ts",
+      "target": "function:src/agents/tools.ts:execTool",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/agents/tools.ts",
+      "target": "function:src/agents/tools.ts:stripBoilerplate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:validateConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:validateConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:loadConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/config/schema.ts",
+      "target": "function:src/config/schema.ts:loadConfig",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "class:src/control-room/server.ts:ControlRoomServer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "function:src/control-room/server.ts:createControlRoom",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "function:src/control-room/server.ts:createControlRoom",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/LaunchForm.tsx",
+      "target": "function:src/control-room/ui/LaunchForm.tsx:LaunchForm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/control-room/ui/LaunchForm.tsx",
+      "target": "function:src/control-room/ui/LaunchForm.tsx:LaunchForm",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/ui/LaunchForm.tsx",
+      "target": "function:src/control-room/ui/LaunchForm.tsx:buildConfig",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "function:src/agents/runner.ts:runPersona",
+      "target": "function:src/agents/tools.ts:execTool",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/control-room/server.ts",
+      "target": "file:src/control-room/server.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/App.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/research/fetch.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/research/browser.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:.agents/skills/web-ingest.md",
+      "target": "file:src/research/fetch.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:.agents/skills/web-ingest.md",
+      "target": "file:src/research/ingest.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:package.json",
+      "target": "file:src/research/browser.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:pnpm-lock.yaml",
+      "target": "config:package.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

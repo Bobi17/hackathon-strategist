@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
+  GatePayload,
   HumanDirective,
   PanelPersonaId,
   PersonaId,
@@ -32,7 +33,7 @@ export type FeedItem =
   | { kind: 'scores'; seq: number; ts: number; round: number; scores: Score[] }
   | { kind: 'verdict'; seq: number; ts: number; round: number; verdict: ReviewerVerdict }
   | { kind: 'directive'; seq: number; ts: number; directive: HumanDirective; accepted: boolean }
-  | { kind: 'gate'; seq: number; ts: number; gate: string; decision: string }
+  | { kind: 'gate'; seq: number; ts: number; gate: string; decision: string; payload?: GatePayload }
 
 export interface StrategistState {
   connected: boolean
@@ -43,7 +44,7 @@ export interface StrategistState {
   stages: Stage[]
   feed: FeedItem[]
   rounds: RoundState[]
-  activeGate: { gate: string } | null
+  activeGate: { gate: string; payload?: GatePayload } | null
   directives: HumanDirective[]
   latestScores: Score[]
   error: string | null
@@ -61,7 +62,7 @@ function toFeedItem(evt: StreamEvent): FeedItem | null {
     case 'score': return { kind: 'scores', seq: evt.seq, ts: evt.ts, round: e.round, scores: e.scores }
     case 'verdict': return { kind: 'verdict', seq: evt.seq, ts: evt.ts, round: e.round, verdict: e.verdict }
     case 'directive': return { kind: 'directive', seq: evt.seq, ts: evt.ts, directive: e.directive, accepted: e.accepted }
-    case 'gate': return { kind: 'gate', seq: evt.seq, ts: evt.ts, gate: e.gate, decision: e.decision }
+    case 'gate': return { kind: 'gate', seq: evt.seq, ts: evt.ts, gate: e.gate, decision: e.decision, payload: e.payload }
     default: return null
   }
 }
@@ -69,6 +70,14 @@ function toFeedItem(evt: StreamEvent): FeedItem | null {
 export function useStrategistStream(wsUrl?: string): StrategistState & {
   interject: (persona: PanelPersonaId | 'all', message: string) => void
   resolveGate: (gate: string, decision: 'approved' | 'rejected') => void
+  /** Pick one of the Top 3 as the winner (pick-winner gate). */
+  pickWinner: (ideaId: string) => void
+  /** Send feedback to rewrite the Top 3 and re-deliberate (pick-winner gate). */
+  sendWinnerFeedback: (message: string) => void
+  /** Tell the server you've signed in and want the browser to re-render the gated URL. */
+  ingestRetry: () => void
+  /** Paste the rendered page content for a login-gated URL (ingest-auth gate). */
+  ingestPaste: (text: string) => void
   launchRun: (config: unknown) => Promise<{ ok: boolean; errors?: { field: string; message: string }[] }>
 } {
   const [events, setEvents] = useState<StreamEvent[]>([])
@@ -147,6 +156,22 @@ export function useStrategistStream(wsUrl?: string): StrategistState & {
     send({ type: 'gate', gate, decision })
   }, [send])
 
+  const pickWinner = useCallback((ideaId: string) => {
+    send({ type: 'gate', gate: 'pickWinner', decision: 'picked', pick: ideaId })
+  }, [send])
+
+  const sendWinnerFeedback = useCallback((message: string) => {
+    send({ type: 'gate', gate: 'pickWinner', decision: 'feedback', message })
+  }, [send])
+
+  const ingestRetry = useCallback(() => {
+    send({ type: 'gate', gate: 'ingest-auth', decision: 'retry' })
+  }, [send])
+
+  const ingestPaste = useCallback((text: string) => {
+    send({ type: 'gate', gate: 'ingest-auth', decision: 'pasted', message: text })
+  }, [send])
+
   /** Submit an EventConfig to the server and start a run (interactive mode). */
   const launchRun = useCallback(async (config: unknown): Promise<{
     ok: boolean
@@ -173,7 +198,7 @@ export function useStrategistStream(wsUrl?: string): StrategistState & {
     let runStatus: RunStatus = 'idle'
     const openGates = new Map<string, boolean>()
     const directives: HumanDirective[] = []
-    let activeGate: { gate: string } | null = null
+    let activeGate: { gate: string; payload?: GatePayload } | null = null
 
     for (const evt of events) {
       const item = toFeedItem(evt)
@@ -216,7 +241,7 @@ export function useStrategistStream(wsUrl?: string): StrategistState & {
         case 'gate': {
           if (item.decision === 'requested') {
             openGates.set(item.gate, true)
-            activeGate = { gate: item.gate }
+            activeGate = { gate: item.gate, payload: item.payload }
           } else {
             openGates.set(item.gate, false)
             if (activeGate?.gate === item.gate) activeGate = null
@@ -249,7 +274,7 @@ export function useStrategistStream(wsUrl?: string): StrategistState & {
     }
   }, [events, connected, error, acceptsRuns])
 
-  return { ...state, interject, resolveGate, launchRun }
+  return { ...state, interject, resolveGate, pickWinner, sendWinnerFeedback, ingestRetry, ingestPaste, launchRun }
 }
 
 export { STAGE_ORDER }

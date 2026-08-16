@@ -1,0 +1,17 @@
+{
+  "fixedSectionOk": true,
+  "nodesRecovered": 1,
+  "edgesRestored": 1,
+  "crossBatchEdgesAdded": 1,
+  "typesRemapped": 0,
+  "complexityRemapped": 0,
+  "notes": [
+    "Fixed section is sane. High dedup rate (174 of 365 input nodes, ~48%) is driven by batch-existing.json overlapping with re-analysis batches; systemic pipeline pattern, not an error.",
+    "10 bare-path nodes received module: prefix and 77 edge references were rewritten after ID normalization - both consistent with expected LLM output patterns.",
+    "Recovered 1 dropped node: function:src/data/scoring.ts:mergeWeights. The file src/data/scoring.ts was analyzed (siblings scoreIdea/rank/sensitivityAnalysis/roundMadeProgress exist) but the LLM omitted this function. Function confirmed present in source (line 13). Recreated node with defaults.",
+    "Restored 1 dropped edge: function:src/engine/deliberation-loop.ts:runDeliberationLoop -> function:src/data/scoring.ts:mergeWeights (calls, weight 0.8). Confirmed real via source: deliberation-loop.ts imports and calls mergeWeights at lines 49 and 74.",
+    "Added 1 cross-batch imports edge from import map: file:src/main.ts -> file:src/engine/event-bus.ts (weight 0.7). Confirmed real via source: main.ts imports './engine/event-bus.js' at line 14.",
+    "Import edge recovery via scan-result.json was skipped by the merge script (scan-result.json not found); importmap-final.json was used for cross-batch gap filling instead.",
+    "No unknown node types, no unknown complexity values, and no nodes missing an id field were present in the batch inputs."
+  ]
+}

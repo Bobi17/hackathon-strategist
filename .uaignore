@@ -5,6 +5,9 @@ dist/
 # Dependencies
 node_modules/
 .pnpm-store/
+.venv/
+.test-tmp/
+.ua/
 
 # Agent scratch
 .agent-logs/

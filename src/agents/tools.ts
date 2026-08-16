@@ -11,10 +11,20 @@ export interface ToolResult {
   error?: string
 }
 
+/**
+ * Per-run context injected into tool executions. The orchestrator supplies an
+ * escalation-aware `fetch` (browser render + human auth gate) so personas can
+ * read login-gated and JS-rendered pages too — not just plain-HTML sites.
+ */
+export interface ToolContext {
+  /** Escalation-aware fetch returning normalized text (or null on failure). Falls back to plain fetch when absent. */
+  fetch?: (url: string) => Promise<string | null>
+}
+
 export interface Tool {
   name: string
   description: string
-  execute: (args: Record<string, unknown>) => Promise<ToolResult>
+  execute: (args: Record<string, unknown>, ctx?: ToolContext) => Promise<ToolResult>
 }
 
 // ── webFetch ───────────────────────────────────────────────────────────────
@@ -22,10 +32,17 @@ export interface Tool {
 export const webFetch: Tool = {
   name: 'webFetch',
   description: 'Fetch a URL and return its text content (HTML normalized, boilerplate stripped).',
-  async execute(args) {
+  async execute(args, ctx) {
     const url = args.url as string
     if (!url) return { ok: false, output: '', error: 'url is required' }
     try {
+      if (ctx?.fetch) {
+        // Escalation-aware path: browser render / human auth gate as needed.
+        // The result is already normalized text.
+        const text = await ctx.fetch(url)
+        if (text === null) return { ok: false, output: '', error: 'fetch failed (page unreachable or login-gated)' }
+        return { ok: true, output: text.slice(0, 50_000) }
+      }
       const res = await fetch(url, {
         headers: { 'User-Agent': 'HackathonStrategist/0.1 (research-bot)' },
         signal: AbortSignal.timeout(15_000),
@@ -126,8 +143,9 @@ export const TOOL_MAP = new Map(ALL_TOOLS.map((t) => [t.name, t]))
 export async function execTool(
   name: string,
   args: Record<string, unknown>,
+  ctx?: ToolContext,
 ): Promise<ToolResult> {
   const tool = TOOL_MAP.get(name)
   if (!tool) return { ok: false, output: '', error: `Unknown tool: ${name}` }
-  return tool.execute(args)
+  return tool.execute(args, ctx)
 }

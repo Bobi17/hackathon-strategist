@@ -3,7 +3,7 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { callLLM, extractJSON, type LLMResult } from './llm.js'
-import { execTool, type ToolResult } from './tools.js'
+import { execTool, type ToolContext, type ToolResult } from './tools.js'
 import type { PersonaId } from '../data/types.js'
 
 export interface PersonaFile {
@@ -73,7 +73,7 @@ export async function loadPersona(category: string, slug: string): Promise<Perso
 export async function runPersona(
   persona: PersonaFile,
   contextMessage: string,
-  opts?: { model?: string; maxToolRounds?: number; tools?: boolean; maxTokens?: number },
+  opts?: { model?: string; maxToolRounds?: number; tools?: boolean; maxTokens?: number; toolContext?: ToolContext },
 ): Promise<RunResult> {
   const model = opts?.model
   const toolsEnabled = opts?.tools ?? false
@@ -119,7 +119,7 @@ export async function runPersona(
     if (toolMatch && round < maxToolRounds) {
       const toolName = toolMatch[1]!
       const toolArgs = JSON.parse(toolMatch[2]!)
-      const toolResult = await execTool(toolName, toolArgs)
+      const toolResult = await execTool(toolName, toolArgs, opts?.toolContext)
       toolCalls.push({ name: toolName, args: toolArgs, result: toolResult })
       // Feed the tool result back through the system prompt (kept small).
       const toolText = toolResult.output.slice(0, 6_000)
@@ -148,7 +148,7 @@ export async function runPersona(
 export async function runPersonaById(
   personaId: PersonaId,
   contextMessage: string,
-  opts?: { model?: string; maxToolRounds?: number; tools?: boolean; maxTokens?: number },
+  opts?: { model?: string; maxToolRounds?: number; tools?: boolean; maxTokens?: number; toolContext?: ToolContext },
 ): Promise<RunResult> {
   const mapping = PERSONA_MAP[personaId]
   if (!mapping) throw new Error(`Unknown persona: ${personaId}`)

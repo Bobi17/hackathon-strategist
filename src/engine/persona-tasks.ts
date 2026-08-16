@@ -6,6 +6,7 @@
 // gracefully to a deterministic stub and flags it — never crashes the run.
 
 import { runPersonaById } from '../agents/runner.js'
+import type { ToolContext } from '../agents/tools.js'
 import { toDebateMessages, toFindings, toIdeaCards, toScores, toVerdict } from '../agents/structured.js'
 import { globalBus } from './event-bus.js'
 import type { DirectiveBroker } from '../control-room/broker.js'
@@ -38,7 +39,7 @@ async function tryRun(
   config: EventConfig,
   persona: PersonaId,
   context: string,
-  opts?: { tools?: boolean; maxTokens?: number },
+  opts?: { tools?: boolean; maxTokens?: number; toolContext?: ToolContext },
 ): Promise<{ raw: string; parsed?: unknown } | null> {
   // One retry on empty output: the local gateways intermittently return an
   // empty body on the first call. A blank response is never legitimate, so
@@ -50,6 +51,7 @@ async function tryRun(
         maxToolRounds: 2,
         tools: opts?.tools ?? false,
         maxTokens: opts?.maxTokens,
+        toolContext: opts?.toolContext,
       })
       if (process.env.DEBUG_LLM === '1') {
         // Dump raw output so shape mismatches are diagnosable.
@@ -133,10 +135,14 @@ const RESEARCH_PERSONAS: { persona: PersonaId; prompt: (input: IngestedInput, co
   },
 ]
 
-export async function runResearch(config: EventConfig, input: IngestedInput): Promise<ResearchResult> {
+export async function runResearch(
+  config: EventConfig,
+  input: IngestedInput,
+  toolContext?: ToolContext,
+): Promise<ResearchResult> {
   const results = await Promise.allSettled(
     RESEARCH_PERSONAS.map(async ({ persona, prompt }) => {
-      const res = await tryRun(config, persona, prompt(input, config), { tools: true })
+      const res = await tryRun(config, persona, prompt(input, config), { tools: true, toolContext })
       if (!res) return { persona, findings: [] as ResearchFinding[], degraded: persona }
       const findings = res.parsed ? toFindings(res.parsed, persona) : []
       return { persona, findings, degraded: findings.length === 0 ? persona : null }
@@ -280,6 +286,58 @@ function stubIdeas(config: EventConfig): IdeaCard[] {
       buildScope: 'MVP: copilot + data ingest. ~10h.',
     },
   ]
+}
+
+// ── Revise Top 3 from human feedback (pick-winner refinement) ──────────────
+
+/**
+ * Rewrite the Top 3 candidate cards from the human's pick-winner feedback plus
+ * the last round's reviewer verdicts. Idea `id`s stay stable so scores carry
+ * across rounds. Degrades to returning the candidates unchanged when the LLM
+ * is unavailable or returns nothing parseable (the orchestrator's refineRounds
+ * cap bounds any resulting no-op loops).
+ */
+export async function reviseIdeas(
+  config: EventConfig,
+  candidates: IdeaCard[],
+  feedback: string,
+  verdicts: ReviewerVerdict[],
+  findings: ResearchFinding[],
+  synthesis: string,
+): Promise<IdeaCard[]> {
+  const lastVerdicts = verdicts.length > 0
+    ? verdicts.map((v) => `${v.reviewer}: ${v.verdict.toUpperCase()}${v.feedback.length > 0 ? ' → ' + v.feedback.map((f) => `${f.topic}: ${f.requiredChange}`).join('; ') : ''}`).join('\n')
+    : '_No reviewer feedback on the last round._'
+
+  const res = await tryRun(config, 'innovation-scout', [
+    'You are refining the Top 3 candidate ideas for a hackathon. A human gave feedback on the current set.',
+    'Rewrite EACH card so it directly addresses the human feedback AND the reviewers\' required changes.',
+    'Keep each idea\'s `id` EXACTLY as given (stable ids let scores carry over). Keep the same number of cards.',
+    'Return JSON: { "ideas": [{ "id": string, "oneLinePitch": string, "problemFit": string, "targetUser": string, "techApproach": string, "differentiator": string, "dataLeverage": string, "gatingFit": string, "buildScope": string }] }',
+    '',
+    section('Human feedback', feedback),
+    section('Reviewer verdicts (last round)', lastVerdicts),
+    section('Current Top 3 cards', JSON.stringify(candidates.map((c) => ({ id: c.id, oneLinePitch: c.oneLinePitch, problemFit: c.problemFit, targetUser: c.targetUser, techApproach: c.techApproach, differentiator: c.differentiator, dataLeverage: c.dataLeverage, gatingFit: c.gatingFit, buildScope: c.buildScope })), null, 2)),
+    section('Synthesis', synthesis, 4_000),
+    section('Findings', renderFindings(findings), 6_000),
+  ].join('\n\n'), { maxTokens: 16_000 })
+
+  const parsed = res?.parsed ? toIdeaCards(res.parsed) : []
+  if (parsed.length === 0) {
+    emitMessage('innovation-scout', 'Refinement degraded (LLM unavailable) — Top 3 unchanged.', ['degraded: LLM unavailable'])
+    return candidates
+  }
+
+  // Map revised cards back onto the originals: stable ids + carry over fields
+  // the LLM isn't asked to regenerate (e.g. feasibility).
+  const byId = new Map(candidates.map((c) => [c.id, c]))
+  const revised = parsed.map((card, i) => {
+    const src = byId.get(card.id) ?? candidates[i]
+    return { ...card, id: src?.id ?? card.id, feasibility: src?.feasibility }
+  })
+
+  emitMessage('innovation-scout', `Refined the Top 3 from your feedback — ${revised.length} card(s) updated.`, [])
+  return revised
 }
 
 // ── Loop callbacks (debate / score / review) ───────────────────────────────

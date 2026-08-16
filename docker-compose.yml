@@ -1,0 +1,18 @@
+services:
+  strategist:
+    build: .
+    volumes:
+      - ./config:/app/config:ro
+      - ./output:/app/output
+      - .env.local:/app/.env.local:ro
+    # Restrict network access to prevent exfiltration while allowing research
+    # Note: Complex network rules are best enforced via a custom docker bridge
+    # or a proxy, but we can start by isolating the container.
+    networks:
+      - research-net
+
+networks:
+  research-net:
+    driver: bridge
+    # For stricter control, one would use a firewall (iptables) on the host
+    # or an egress proxy to only allow known research domains.

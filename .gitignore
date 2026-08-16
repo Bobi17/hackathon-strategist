@@ -1,6 +1,7 @@
 # deps
 node_modules/
 .pnpm-store/
+.venv/
 
 # build & test output
 dist/

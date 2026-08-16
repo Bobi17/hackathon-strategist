@@ -146,6 +146,36 @@ export interface LoopOutcome {
   dissentLog: { reviewer: PanelPersonaId; objection: string }[]
 }
 
+// ── Pick-winner checkpoint ────────────────────────────────────────────────
+
+/**
+ * How the human resolves the pick-winner checkpoint: they picked one of the
+ * Top 3, gave feedback to refine the ideas (orchestrator re-deliberates and
+ * re-presents), or the gate timed out / auto-resolved.
+ */
+export type PickWinnerResolution =
+  | { kind: 'picked'; ideaId: string }
+  | { kind: 'feedback'; message: string }
+  | { kind: 'escalated' }
+
+/** Optional context broadcast with a gate event so the UI can render it. */
+export interface GatePayload {
+  top3?: IdeaCard[]
+  winner?: IdeaCard
+  /** URL that needs human sign-in (ingest-auth gate). */
+  url?: string
+}
+
+/**
+ * How the human resolves an ingest-auth checkpoint: they signed in and want a
+ * re-render ("retry"), they pasted the page content ("pasted"), or the gate
+ * timed out / auto-resolved ("escalated").
+ */
+export type IngestAuthResolution =
+  | { kind: 'retry' }
+  | { kind: 'pasted'; text: string }
+  | { kind: 'escalated' }
+
 // ── Event bus ──────────────────────────────────────────────────────────────
 
 export type LoopEvent =
@@ -156,7 +186,7 @@ export type LoopEvent =
   | { kind: 'score'; round: number; scores: Score[] }
   | { kind: 'verdict'; round: number; verdict: ReviewerVerdict }
   | { kind: 'directive'; directive: HumanDirective; accepted: boolean }
-  | { kind: 'gate'; gate: string; decision: 'requested' | 'resolved' | 'escalated' }
+  | { kind: 'gate'; gate: string; decision: 'requested' | 'resolved' | 'escalated' | 'picked' | 'feedback' | 'retry' | 'pasted'; payload?: GatePayload; message?: string }
 
 export interface StreamEvent {
   seq: number

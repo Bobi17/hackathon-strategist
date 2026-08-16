@@ -34,6 +34,7 @@ ls output/example/
 |---|---|---|
 | Config system | ✅ | `EventConfig` types, JSON schema validation, per-event configs in `config/events/` |
 | Ingestion pipeline | ✅ | Fetches event URLs, normalizes HTML, caches, profiles local data files |
+| **Browser + paste ingestion** | ✅ | Chromium engine (Playwright) for login-gated / SPA pages; control-room paste fallback; persistent session profile |
 | Stage machine | ✅ | Drives stages: ingest → research → synthesize → ideate → loop → finalize → artifacts |
 | Budget governor | ✅ | Enforces research hours, max rounds, per-round time limits |
 | Deliberation loop | ✅ | Iterative debate → score → review → approve/revise with non-convergence detection |
@@ -48,8 +49,8 @@ ls output/example/
 | Review via LLM | ✅ | Judge + Sponsor + Audience + Feasibility panel, per-idea verdicts |
 | Graceful degradation | ✅ | Persona failures fall back to deterministic stubs with `⚠ degraded` flags |
 | Empty-output retry | ✅ | Gateway returning an empty body → retried once before degrading |
-| **Control room (Phase 4)** | ✅ | WS stream, live transcript, scoring board, verdicts, interject, gates |
-| Tests | ✅ | 44 tests: unit + orchestrator E2E (stubs) + WS/gate integration + sensitivity |
+| **Control room (Phase 4)** | ✅ | WS stream, live transcript, scoring board, verdicts, interject, gates, pick-winner |
+| Tests | ✅ | 70 tests: unit + orchestrator E2E (stubs) + WS/gate/pick-winner/ingest-auth integration + escalation |
 
 ## Execution: Step by Step
 
@@ -120,10 +121,20 @@ Edit `config/events/my-event/event.json`:
   "mode": "headless",
   "budgets": {
     "researchHours": 2,
-    "maxRounds": 3
+    "maxRounds": 3,
+    "refineRounds": 3
+  },
+  "gates": {
+    "approveTop3": false,
+    "pickWinner": true
   }
 }
 ```
+
+`gates.pickWinner` (default `true`) presents the Top 3 for a pick-or-feedback
+decision in UI mode; `budgets.refineRounds` (default `3`) caps how many
+feedback→rewrite→re-deliberate cycles run before the top-ranked idea is taken.
+`gates.approveWinner` is legacy and ignored — use `pickWinner`.
 
 Required fields: `slug`, `name`, `websiteUrls` (≥1), `problemStatements` (≥1), `team`.
 
@@ -179,10 +190,16 @@ The control room is the human-in-the-loop surface for a run:
 - **Reviewer verdicts** — approve/revise chips with the concrete feedback.
 - **Interject** — send a directive to a reviewer persona (or all). It is injected
   into that persona's context on the next review round and recorded in the loop log.
-- **Gates** — when the config sets `mode: "ui"` and `gates.approveTop3` /
-  `gates.approveWinner`, the run holds at those checkpoints until you click
-  **Approve** (or **Reject**, which vetoes and escalates). Headless runs and
-  `budgets.continueWithoutPause: true` auto-resolve gates without blocking.
+- **Gates** — when the config sets `mode: "ui"`, the run holds at checkpoints
+  until you act. **Top 3** (`gates.approveTop3`): approve/reject the shortlist.
+  **Pick the winner** (`gates.pickWinner`, default on): the Top 3 cards are
+  presented — **★ Pick** one as the winner, or send **feedback** to rewrite
+  those cards and re-deliberate (the refined Top 3 are re-presented, up to
+  `budgets.refineRounds` iterations, default 3). **Ingest login gate**: when a
+  website URL is login-walled or JS-rendered, a browser window opens — sign in
+  and click **I've signed in**, or paste the page content. Headless runs and
+  `budgets.continueWithoutPause: true` auto-resolve: the top-ranked idea is
+  picked; gated URLs become gaps.
 
 ### Step 5 — Inspect output
 
@@ -222,7 +239,7 @@ hackathon-strategist/
     data/                      # Domain types, scoring engine, idea pool
     engine/                    # Stage machine, budget governor, deliberation loop, orchestrator
     agents/                    # LLM client (multi-provider), persona runner, tools, registry
-    research/                  # Ingestion pipeline + parsers
+    research/                  # Ingestion pipeline + parsers + browser session
     artifacts/                 # Markdown artifact writer + templates
     control-room/              # WS+HTTP server, directive broker, React UI
   output/                      # generated artifacts (gitignored)
@@ -245,6 +262,47 @@ rubric ───────┘  │        │                         │  ├
                  │  transcript · scoring · interject │
                  └──────────────────────────────────┘
 ```
+
+## Browser + paste ingestion
+
+Hackathon sites (Devpost, Devfolio, sponsor sites, past-winners pages) often
+require login or render content client-side via JavaScript. The ingestion
+pipeline now handles both cases automatically:
+
+**How it works** — per URL, the pipeline escalates up this chain:
+
+1. **Plain fetch** (static HTML) — fast path; skips the browser entirely.
+2. **Chromium render** (Playwright) — when the plain fetch returns thin or no
+   content, or when `useBrowser: true` is set. A persistent Chromium profile
+   stores cookies/localStorage so a login persists across URLs and re-runs.
+3. **Interactive auth gate** (UI mode only) — a browser window opens at the
+   gated URL; the human signs in, then clicks **I've signed in — continue**.
+   Alternatively, paste the page content into the control room.
+4. **Gap** — headless mode with no saved session: the URL is flagged as a gap
+   and research runs on what it can.
+
+**Install** (one-time, only needed when you actually hit a login/SPA page):
+
+```bash
+pnpm add playwright && pnpm exec playwright install chromium
+# If system libraries are missing: pnpm exec playwright install-deps chromium
+```
+
+**Config flags** (optional, in your `config/events/*.json`):
+
+| Flag | Type | Default | Purpose |
+|---|---|---|---|
+| `useBrowser` | `boolean` | `false` | Force the Chromium engine for all URLs (skip plain-fetch fast path). |
+| `minContentChars` | `number` | `300` | Plain-fetched content shorter than this is treated as "thin" and escalated to the browser. |
+
+**Session persistence**: the Chromium profile lives at
+`output/<slug>/.cache/browser-profile/`. It survives across runs, so a second
+run of the same event is already logged in. Delete that directory to log out
+and reset.
+
+**Persona webFetch**: research personas can also discover gated URLs mid-run via
+their `webFetch` tool — those fetches automatically use the same logged-in
+session. The paste fallback works even without Playwright installed.
 
 ## What's Next (Remaining Work)
 

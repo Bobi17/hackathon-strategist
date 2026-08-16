@@ -1,9 +1,9 @@
-// ── Ingestion pipeline — fetch, normalize, cache ───────────────────────────
+// ── Ingestion pipeline — fetch (with escalation), normalize, cache ─────────
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { EventConfig } from '../config/types.js'
-import { normalizeHTML } from './parsers/html.js'
+import { fetchWithEscalation, type EscalationDeps } from './fetch.js'
 
 export interface IngestedInput {
   siteSections: { url: string; content: string }[]
@@ -15,37 +15,49 @@ export interface IngestedInput {
 }
 
 /**
- * Ingest all inputs for an event. Fetches websites, reads local files,
- * and flags gaps. Results are cached under output/<slug>/.cache/.
+ * Ingest all inputs for an event. Fetches websites — escalating to a browser
+ * render / human sign-in gate when a page is login-walled or JS-rendered —
+ * reads local files, and flags gaps. Results are cached under
+ * output/<slug>/.cache/ so a re-run skips re-fetching and re-logging-in.
+ *
+ * `deps` supplies the browser session and control-room server for escalation;
+ * the default (no session, auto) keeps existing headless callers unchanged.
  */
-export async function ingestEvent(config: EventConfig): Promise<IngestedInput> {
+export async function ingestEvent(
+  config: EventConfig,
+  deps: EscalationDeps = { session: null, auto: true },
+): Promise<IngestedInput> {
   const cacheDir = join(config.outputDir ?? 'output', config.slug, '.cache')
   await mkdir(cacheDir, { recursive: true })
 
   const siteSections: IngestedInput['siteSections'] = []
   const gaps: string[] = []
 
-  // ── Fetch event websites ────────────────────────────────────────────
-  for (const url of config.websiteUrls) {
+  /** Fetch one URL (any source) with a per-URL cache. Returns null on failure. */
+  async function fetchSection(url: string, label: string): Promise<string | null> {
     const cacheFile = join(cacheDir, `site-${Buffer.from(url).toString('base64url').slice(0, 60)}.txt`)
-    let content: string
 
+    // Cached content (from any prior source — fetch, browser, or pasted) is
+    // reused so a re-run skips fetching and any login.
     try {
-      const cached = await readFile(cacheFile, 'utf-8')
-      content = cached
+      return await readFile(cacheFile, 'utf-8')
     } catch {
-      // Not cached — fetch
-      const result = await fetchWithTimeout(url)
-      if (result) {
-        content = normalizeHTML(result)
-        await writeFile(cacheFile, content, 'utf-8')
-      } else {
-        gaps.push(`Could not fetch website: ${url}`)
-        content = `[FETCH FAILED: ${url}]`
-      }
+      /* not cached — fetch */
     }
 
-    siteSections.push({ url, content })
+    const outcome = await fetchWithEscalation(config, url, deps)
+    if (outcome.source === 'failed' || !outcome.content) {
+      gaps.push(`Could not fetch ${label}: ${url}`)
+      return null
+    }
+    await writeFile(cacheFile, outcome.content, 'utf-8')
+    return outcome.content
+  }
+
+  // ── Event websites ────────────────────────────────────────────────────
+  for (const url of config.websiteUrls) {
+    const content = await fetchSection(url, 'website')
+    if (content) siteSections.push({ url, content })
   }
 
   // ── Read local data files ───────────────────────────────────────────
@@ -54,23 +66,14 @@ export async function ingestEvent(config: EventConfig): Promise<IngestedInput> {
   // ── Rubric (if URL provided) ────────────────────────────────────────
   let rubricText: string | undefined
   if (config.rubricUrl) {
-    const result = await fetchWithTimeout(config.rubricUrl)
-    if (result) {
-      rubricText = normalizeHTML(result)
-    } else {
-      gaps.push(`Could not fetch rubric: ${config.rubricUrl}`)
-    }
+    rubricText = (await fetchSection(config.rubricUrl, 'rubric')) ?? undefined
   }
 
   // ── Past winners ────────────────────────────────────────────────────
   if (config.pastWinnersUrls?.length) {
     for (const url of config.pastWinnersUrls) {
-      const result = await fetchWithTimeout(url)
-      if (result) {
-        siteSections.push({ url, content: normalizeHTML(result) })
-      } else {
-        gaps.push(`Could not fetch past winners: ${url}`)
-      }
+      const content = await fetchSection(url, 'past winners')
+      if (content) siteSections.push({ url, content })
     }
   }
 
@@ -80,18 +83,5 @@ export async function ingestEvent(config: EventConfig): Promise<IngestedInput> {
     dataFilePaths,
     rubricText,
     gaps,
-  }
-}
-
-async function fetchWithTimeout(url: string, timeoutMs = 15_000): Promise<string | null> {
-  try {
-    const res = await fetch(url, {
-      headers: { 'User-Agent': 'HackathonStrategist/0.1 (research-bot)' },
-      signal: AbortSignal.timeout(timeoutMs),
-    })
-    if (!res.ok) return null
-    return await res.text()
-  } catch {
-    return null
   }
 }

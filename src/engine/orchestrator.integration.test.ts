@@ -10,6 +10,8 @@ import { mkdir, mkdtemp, readFile, rm, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { EventConfig } from '../config/types.js'
 import { Orchestrator } from './orchestrator.js'
+import { ControlRoomServer } from '../control-room/server.js'
+import { DirectiveBroker } from '../control-room/broker.js'
 
 // Project-local scratch (gitignored) so tests never write outside the repo root.
 const SCRATCH_ROOT = join(process.cwd(), '.test-tmp')
@@ -37,7 +39,7 @@ function makeConfig(dir: string): EventConfig {
     team: { size: 3, skills: ['typescript', 'react'] },
     mode: 'headless',
     budgets: { researchHours: 0, maxRounds: 1, continueWithoutPause: true },
-    gates: { approveTop3: true, approveWinner: true },
+    gates: { approveTop3: true, pickWinner: true },
     outputDir: dir,
   }
 }
@@ -98,5 +100,26 @@ describe('Orchestrator end-to-end (stubs, no LLM)', () => {
     const files = await readdir(join(dir, 'itest'))
     const md = files.filter((f) => f.endsWith('.md')).sort()
     expect(md).toEqual([...ARTIFACTS].sort())
+  })
+
+  it('auto-picks the top-ranked idea through the pick-winner gate (server present)', async () => {
+    const cfg = { ...makeConfig(dir), slug: 'pick', outputDir: dir }
+    const broker = new DirectiveBroker()
+    const server = new ControlRoomServer({ broker, port: 0, gateTimeoutMs: 0 })
+    server.autoResolveGates = true // headless → auto-resolve all gates including pickWinner
+    await server.start()
+
+    const orch = new Orchestrator(cfg, { server, broker })
+    const { outcome, artifactPaths } = await orch.run()
+    await server.close()
+
+    expect(outcome.top3.length).toBeGreaterThan(0)
+    // Winner must be the top-ranked idea from the loop's final scores.
+    const lastScores = [...(outcome.rounds[outcome.rounds.length - 1]?.scores ?? [])]
+    const topScored = lastScores.sort((a, b) => b.total - a.total)[0]
+    expect(outcome.winner.id).toBe(topScored!.ideaId)
+
+    // The pick-winner gate should also write artifacts (no crashes).
+    expect(artifactPaths.length).toBeGreaterThan(0)
   })
 })

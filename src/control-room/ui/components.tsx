@@ -1,7 +1,7 @@
 // ── Control-room components — stage rail, transcript, score board, gates ──
 
 import { useState, type ReactNode } from 'react'
-import type { PanelPersonaId, PersonaId, ReviewerVerdict, Score } from '../../data/types'
+import type { GatePayload, IdeaCard, PanelPersonaId, PersonaId, ReviewerVerdict, Score } from '../../data/types'
 import { personaMeta } from './meta'
 import type { FeedItem, RoundState } from './useStrategistStream'
 import { STAGE_ORDER } from './useStrategistStream'
@@ -208,16 +208,199 @@ export function VerdictPanel({ round }: { round?: RoundState }) {
 
 // ── Gates ──────────────────────────────────────────────────────────────────
 
+const clamp = (s: string | undefined, max: number): string => {
+  const t = (s ?? '').trim()
+  if (!t) return ''
+  return t.length > max ? `${t.slice(0, max)}…` : t
+}
+
+/** Pick-winner checkpoint: present the Top 3 and let the human pick one or send feedback to refine. */
+function PickWinnerControls({
+  top3,
+  onPick,
+  onFeedback,
+}: {
+  top3: IdeaCard[]
+  onPick: (ideaId: string) => void
+  onFeedback: (message: string) => void
+}) {
+  const [feedback, setFeedback] = useState('')
+
+  const send = () => {
+    const m = feedback.trim()
+    if (!m) return
+    onFeedback(m)
+    setFeedback('')
+  }
+
+  if (top3.length === 0) {
+    return <div className="text-sm text-zinc-600 italic py-3 text-center">No ideas to present yet.</div>
+  }
+
+  return (
+    <div className="rounded-xl border border-cyan-800 bg-cyan-950/20 p-4">
+      <div className="text-sm font-semibold text-cyan-200 mb-1">🎯 Pick the winner</div>
+      <p className="text-xs text-zinc-400 mb-3">
+        The Top 3 are finalized. Pick one as the winner, or send feedback to rewrite these ideas and re-deliberate.
+      </p>
+
+      <div className="space-y-3">
+        {top3.map((idea, i) => (
+          <div key={idea.id} className="rounded-lg border border-zinc-700 bg-zinc-900/60 p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="px-1.5 py-0.5 rounded bg-cyan-900/60 text-cyan-200 text-[10px] font-bold">#{i + 1}</span>
+                  <span className="text-xs font-mono text-zinc-500">{idea.id}</span>
+                </div>
+                <p className="text-sm font-semibold text-zinc-100 mt-1">{idea.oneLinePitch}</p>
+              </div>
+              <button
+                onClick={() => onPick(idea.id)}
+                className="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-medium transition-colors"
+              >
+                ★ Pick
+              </button>
+            </div>
+            {clamp(idea.differentiator, 140) && (
+              <p className="text-xs text-zinc-400 mt-2"><span className="text-zinc-500">Differentiator:</span> {clamp(idea.differentiator, 140)}</p>
+            )}
+            {clamp(idea.dataLeverage, 140) && (
+              <p className="text-xs text-zinc-400 mt-1"><span className="text-zinc-500">Data:</span> {clamp(idea.dataLeverage, 140)}</p>
+            )}
+            {clamp(idea.buildScope, 140) && (
+              <p className="text-xs text-zinc-400 mt-1"><span className="text-zinc-500">Scope:</span> {clamp(idea.buildScope, 140)}</p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 border-t border-zinc-800 pt-3">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+          Not happy with any? Send feedback to refine
+        </label>
+        <textarea
+          value={feedback}
+          onChange={(e) => setFeedback(e.target.value)}
+          rows={3}
+          placeholder="e.g. focus more on the data advantage, cut the dashboard scope, make the demo more personal…"
+          className="w-full bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-cyan-500"
+        />
+        <button
+          onClick={send}
+          disabled={!feedback.trim()}
+          className="mt-2 px-3 py-1.5 rounded-lg bg-cyan-800 hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
+        >
+          Send feedback &amp; refine
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/** Ingest-auth checkpoint: a page needs the human to sign in, or paste its content. */
+function AuthGatePanel({
+  url,
+  onRetry,
+  onPaste,
+}: {
+  url?: string
+  onRetry?: () => void
+  onPaste?: (text: string) => void
+}) {
+  const [content, setContent] = useState('')
+  const [pasted, setPasted] = useState(false)
+
+  const sendPaste = () => {
+    const t = content.trim()
+    if (!t || !onPaste) return
+    onPaste(t)
+    setContent('')
+    setPasted(true)
+  }
+
+  return (
+    <div className="rounded-xl border border-purple-800 bg-purple-950/20 p-4">
+      <div className="text-sm font-semibold text-purple-200 mb-1">🔐 Login required</div>
+      {url && (
+        <p className="text-xs text-zinc-400 mb-2 font-mono break-all truncate max-w-full">{url}</p>
+      )}
+      <p className="text-xs text-zinc-400 mb-3">
+        A browser window is open — sign in, then click <strong>I've signed in</strong> to continue.
+      </p>
+      <button
+        onClick={onRetry}
+        className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-medium transition-colors"
+      >
+        ✓ I've signed in — continue
+      </button>
+
+      {pasted && (
+        <p className="text-xs text-emerald-400 mt-2">Content received — continuing…</p>
+      )}
+
+      <div className="mt-3 border-t border-purple-900/50 pt-3">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+          …or paste the page content
+        </label>
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          rows={4}
+          placeholder="Open the page in your browser, select all, copy, and paste the text here."
+          className="w-full bg-zinc-800 border border-zinc-700 rounded px-2.5 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+        />
+        <button
+          onClick={sendPaste}
+          disabled={!content.trim()}
+          className="mt-2 px-3 py-1.5 rounded-lg bg-purple-800 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
+        >
+          Send content
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function GateControls({
   activeGate,
   onResolve,
+  onPick,
+  onFeedback,
+  onIngestRetry,
+  onIngestPaste,
 }: {
-  activeGate: { gate: string } | null
+  activeGate: { gate: string; payload?: GatePayload } | null
   onResolve: (gate: string, decision: 'approved' | 'rejected') => void
+  onPick: (ideaId: string) => void
+  onFeedback: (message: string) => void
+  onIngestRetry?: () => void
+  onIngestPaste?: (text: string) => void
 }) {
   if (!activeGate) {
     return <div className="text-sm text-zinc-600 italic py-3 text-center">No open gates.</div>
   }
+
+  if (activeGate.gate === 'pickWinner') {
+    return (
+      <PickWinnerControls
+        top3={activeGate.payload?.top3 ?? []}
+        onPick={onPick}
+        onFeedback={onFeedback}
+      />
+    )
+  }
+
+  if (activeGate.gate === 'ingest-auth') {
+    return (
+      <AuthGatePanel
+        url={activeGate.payload?.url}
+        onRetry={onIngestRetry}
+        onPaste={onIngestPaste}
+      />
+    )
+  }
+
   return (
     <div className="rounded-xl border border-yellow-800 bg-yellow-950/20 p-4">
       <div className="text-sm font-semibold text-yellow-200 mb-1">🚦 Gate: {activeGate.gate}</div>

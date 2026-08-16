@@ -20,6 +20,13 @@ import type { BudgetGovernor } from './budget-governor.js'
  * External systems provide the debate/score/review implementations via
  * callbacks — this module owns the loop logic, not the LLM calls.
  */
+export interface DeliberationResume {
+  /** Continue numbering from this round (e.g. a pick-winner refinement). */
+  startRound?: number
+  /** Prior rounds to carry into the merged history (kept in `allRounds`/`outcome.rounds`). */
+  priorRounds?: DeliberationRound[]
+}
+
 export async function runDeliberationLoop(
   config: EventConfig,
   budget: BudgetGovernor,
@@ -37,13 +44,14 @@ export async function runDeliberationLoop(
      */
     collectDirectives?: () => HumanDirective[]
   },
+  resume?: DeliberationResume,
 ): Promise<{ outcome: LoopOutcome; allRounds: DeliberationRound[] }> {
   const weights = mergeWeights(config.weights)
-  const allRounds: DeliberationRound[] = []
+  const allRounds: DeliberationRound[] = resume?.priorRounds ?? []
   const candidates: IdeaCard[] = [...initialCandidates]
 
   let approved = false
-  let roundNumber = 0
+  let roundNumber = resume?.startRound ?? 0
   let approvals: Record<PanelPersonaId, boolean> = {} as Record<PanelPersonaId, boolean>
   let dissentLog: LoopOutcome['dissentLog'] = []
 

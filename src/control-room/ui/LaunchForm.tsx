@@ -31,7 +31,7 @@ interface FormState {
   perRoundMinutes: string
   continueWithoutPause: boolean
   approveTop3: boolean
-  approveWinner: boolean
+  pickWinner: boolean
 }
 
 const EMPTY: FormState = {
@@ -50,7 +50,7 @@ const EMPTY: FormState = {
   perRoundMinutes: '10',
   continueWithoutPause: true,
   approveTop3: false,
-  approveWinner: false,
+  pickWinner: true,
 }
 
 const EXAMPLE_JSON = `{
@@ -99,7 +99,7 @@ function buildConfig(f: FormState): Record<string, unknown> {
       perRoundMinutes: num(f.perRoundMinutes),
       continueWithoutPause: f.continueWithoutPause,
     },
-    gates: { approveTop3: f.approveTop3, approveWinner: f.approveWinner },
+    gates: { approveTop3: f.approveTop3, pickWinner: f.pickWinner },
   }
 }
 
@@ -281,8 +281,8 @@ export function LaunchForm({ onLaunch }: Props) {
                 Gate: approve Top 3
               </label>
               <label className="flex items-center gap-2 text-sm text-zinc-300">
-                <input type="checkbox" className="accent-cyan-500" checked={form.approveWinner} onChange={(e) => set('approveWinner', e.target.checked)} />
-                Gate: approve winner
+                <input type="checkbox" className="accent-cyan-500" checked={form.pickWinner} onChange={(e) => set('pickWinner', e.target.checked)} />
+                Gate: pick the winner (Top 3 pick-or-feedback)
               </label>
             </div>
           </>

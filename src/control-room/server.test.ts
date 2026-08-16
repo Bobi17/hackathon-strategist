@@ -37,6 +37,10 @@ function connect(port: number): Promise<{ ws: WebSocket; received: WireMsg[] }> 
   return new Promise((res) => ws.once('open', () => res({ ws, received })))
 }
 
+function makeIdea(id: string) {
+  return { id, oneLinePitch: `Idea ${id}`, problemFit: '', targetUser: '', techApproach: '', differentiator: '', dataLeverage: '', gatingFit: '', buildScope: '' }
+}
+
 describe('ControlRoomServer', () => {
   const servers: ControlRoomServer[] = []
 
@@ -116,6 +120,98 @@ describe('ControlRoomServer', () => {
     const gate = server.requestGate('approveTop3')
     expect(await gate).toBe(false)
     await waitFor(() => received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'escalated'))
+    ws.close()
+  })
+
+  it('auto-resolves the pick-winner gate to the top-ranked idea (headless)', async () => {
+    const server = makeServer()
+    server.autoResolveGates = true
+    await server.start()
+    const res = await server.requestPickWinner([makeIdea('a'), makeIdea('b')])
+    expect(res).toEqual({ kind: 'picked', ideaId: 'a' })
+  })
+
+  it('resolves the pick-winner gate when the client picks an idea', async () => {
+    const server = makeServer()
+    await server.start()
+    const { ws, received } = await connect(server.port)
+    const gate = server.requestPickWinner([makeIdea('a'), makeIdea('b')])
+    await waitFor(() => received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'requested'))
+    ws.send(JSON.stringify({ type: 'gate', gate: 'pickWinner', decision: 'picked', pick: 'b' }))
+    expect(await gate).toEqual({ kind: 'picked', ideaId: 'b' })
+    await waitFor(() => received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'picked'))
+    ws.close()
+  })
+
+  it('resolves the pick-winner gate when the client sends feedback', async () => {
+    const server = makeServer()
+    await server.start()
+    const { ws, received } = await connect(server.port)
+    const gate = server.requestPickWinner([makeIdea('a')])
+    await waitFor(() => received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'requested'))
+    ws.send(JSON.stringify({ type: 'gate', gate: 'pickWinner', decision: 'feedback', message: 'Make the demo more personal' }))
+    expect(await gate).toEqual({ kind: 'feedback', message: 'Make the demo more personal' })
+    await waitFor(() => received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'feedback'))
+    ws.close()
+  })
+
+  it('escalates the pick-winner gate when the human does not respond in time', async () => {
+    const server = makeServer({ gateTimeoutMs: 50 })
+    await server.start()
+    const res = await server.requestPickWinner([makeIdea('a')])
+    expect(res).toEqual({ kind: 'escalated' })
+  })
+
+  // ── requestIngestAuth ────────────────────────────────────────────────
+
+  it('auto-resolves requestIngestAuth to escalated (headless)', async () => {
+    const server = makeServer()
+    server.autoResolveGates = true
+    await server.start()
+    const res = await server.requestIngestAuth('https://login-required.dev')
+    expect(res).toEqual({ kind: 'escalated' })
+  })
+
+  it('resolves requestIngestAuth when the client sends retry', async () => {
+    const server = makeServer()
+    await server.start()
+    const { ws, received } = await connect(server.port)
+    const gate = server.requestIngestAuth('https://login-required.dev')
+    await waitFor(() => received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'requested'))
+    ws.send(JSON.stringify({ type: 'gate', gate: 'ingest-auth', decision: 'retry' }))
+    expect(await gate).toEqual({ kind: 'retry' })
+    await waitFor(() => received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'retry'))
+    ws.close()
+  })
+
+  it('resolves requestIngestAuth when the client pastes content', async () => {
+    const server = makeServer()
+    await server.start()
+    const { ws, received } = await connect(server.port)
+    const gate = server.requestIngestAuth('https://login-required.dev')
+    await waitFor(() => received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'requested'))
+    ws.send(JSON.stringify({ type: 'gate', gate: 'ingest-auth', decision: 'pasted', message: 'The page content here.' }))
+    expect(await gate).toEqual({ kind: 'pasted', text: 'The page content here.' })
+    await waitFor(() => received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'pasted'))
+    ws.close()
+  })
+
+  it('escalates requestIngestAuth on timeout', async () => {
+    const server = makeServer({ gateTimeoutMs: 50 })
+    await server.start()
+    const res = await server.requestIngestAuth('https://login-required.dev')
+    expect(res).toEqual({ kind: 'escalated' })
+  })
+
+  it('sends the URL in the gate payload', async () => {
+    const server = makeServer()
+    await server.start()
+    const { ws, received } = await connect(server.port)
+    server.requestIngestAuth('https://gated.dev/page')
+    const evt = await waitFor(() =>
+      received.find((m) => m.event?.kind === 'gate' && m.event?.decision === 'requested'),
+    )
+    expect(evt.event?.payload).toEqual({ url: 'https://gated.dev/page' })
     ws.close()
   })
 
