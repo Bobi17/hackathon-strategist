@@ -33,7 +33,19 @@ The Strategist uses a stage-based orchestration engine to drive a panel of 12 sp
 Isolated, secure, and production-ready environment.
 
 1. Build: `docker compose build`
-2. Run: `docker compose run --rm strategist pnpm strategist:run -c config/events/my-event/event.json`
+
+2a. **Headless run:**
+```bash
+docker compose run --rm strategist \
+  pnpm strategist:run -c config/events/my-event/event.json
+```
+
+2b. **Control Room UI (interactive):**
+```bash
+docker compose run --rm -p 8787:8787 strategist \
+  pnpm strategist:run -c config/events/my-event/event.json --ui
+```
+Then open `http://localhost:8787` in your browser.
 
 See `docker-compose.yml` and `Dockerfile` for network/resource constraints.
 
