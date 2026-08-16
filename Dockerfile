@@ -40,6 +40,9 @@ RUN pnpm install --frozen-lockfile
 # Copy project files
 COPY . .
 
+# Build the control-room UI (outputs to dist/)
+RUN pnpm build
+
 # Create non-root user and ensure ownership of /app
 RUN useradd -m strategist && chown -R strategist:strategist /app
 USER strategist
