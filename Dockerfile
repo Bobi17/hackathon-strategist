@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Install pnpm
+# Install pnpm globally
 RUN npm install -g pnpm
 
 # Copy package files
@@ -40,9 +40,14 @@ RUN pnpm install --frozen-lockfile
 # Copy project files
 COPY . .
 
-# Run as non-root user for security
-RUN useradd -m strategist
+# Create non-root user and ensure ownership of /app
+RUN useradd -m strategist && chown -R strategist:strategist /app
 USER strategist
+
+# pnpm store/temp directory writable by strategist
+ENV PNPM_HOME=/home/strategist/.local/share/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN mkdir -p /home/strategist/.local/share/pnpm
 
 # Default command
 CMD ["pnpm", "strategist:run"]
