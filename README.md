@@ -28,6 +28,77 @@ ls output/example/
 # spec.md  implementation-plan.md  shortlist.md  loop-log.md  ...
 ```
 
+## Container Setup & Run (Docker) 🐳
+
+The recommended way to run the Strategist in a production-like, isolated
+environment. The `Dockerfile` bakes in Node 22 + Playwright's Chromium system
+libraries, and the app runs as a non-root `strategist` user — no host browser,
+no global installs, no arbitrary network egress. This is the same code path as
+the local run; only the environment is sandboxed.
+
+### Prerequisites
+- **Docker** ≥ 24 with **Compose v2** (`docker --version`, `docker compose version`)
+- The same **one LLM provider** as a local run (set in `.env.local` below)
+
+### Step A — Build the image
+
+```bash
+cd hackathon-strategist
+docker compose build
+```
+
+### Step B — Configure (on the host)
+
+The container reads your event config and env read-only via volume mounts, so
+create them on the host before running:
+
+```bash
+cp .env.example .env.local                      # set exactly one LLM provider (url/key/model)
+mkdir -p config/events/my-event
+cp config/events/example.json config/events/my-event/event.json   # then edit
+```
+
+### Step C — Run
+
+All three run modes are supported. Artifacts are written to `./output/` on the
+host (volume-mounted), so `ls output/my-event/` works after the run.
+
+**1. Headless**
+
+```bash
+docker compose run --rm strategist pnpm strategist:run -c config/events/my-event/event.json
+```
+
+**2. Control room + config file (watch live)**
+
+```bash
+docker compose run --rm -p 8787:8787 strategist \
+  pnpm strategist:run -c config/events/my-event/event.json --ui
+# Open http://localhost:8787
+```
+
+**3. Control room — feed the event from the browser (interactive)**
+
+```bash
+docker compose run --rm -p 8787:8787 strategist pnpm strategist:run --ui
+# Open http://localhost:8787 → fill in the form → Start run
+```
+
+### What the container enforces
+
+| Mechanism | Effect |
+|---|---|
+| Non-root `strategist` user | No privileged file access inside the container |
+| `config/` + `.env.local` mounted **read-only** | The app reads inputs but cannot modify them |
+| Dedicated `research-net` bridge network | Isolated from the host network; only published ports are exposed |
+| `output/` volume | Artifacts persist on the host; nothing else leaves the container |
+
+> **Browser + paste ingestion inside Docker**: Playwright's Chromium and its
+> system libraries are already in the image, so login-gated / JS-rendered pages
+> work out of the box. The persistent login profile lives under
+> `output/<slug>/.cache/browser-profile/`, which persists via the mounted volume.
+> To reset a saved login, delete that directory on the host.
+
 ## What's Working Now
 
 | Component | Status | Detail |

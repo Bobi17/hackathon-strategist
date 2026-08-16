@@ -1,0 +1,11 @@
+node_modules/
+dist/
+output/
+.env.local
+.cache/
+.DS_Store
+.git/
+.vscode/
+Dockerfile
+docker-compose.yml
+.claude/
