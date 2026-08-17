@@ -1,0 +1,22 @@
+{
+  "slug": "browser-test",
+  "name": "Browser Test Event",
+  "websiteUrls": ["https://example.com"],
+  "problemStatements": [
+    "Build something cool."
+  ],
+  "dataFiles": [],
+  "pastWinnersUrls": [],
+  "team": {
+    "size": 1,
+    "skills": ["typescript"]
+  },
+  "mode": "headless",
+  "budgets": {
+    "researchHours": 0.1,
+    "maxRounds": 1,
+    "perRoundMinutes": 2,
+    "continueWithoutPause": true
+  },
+  "useBrowser": true
+}
